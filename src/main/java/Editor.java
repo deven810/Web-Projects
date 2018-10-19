@@ -37,11 +37,65 @@ public class Editor extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         isWellFormedRequest(request, response);
-        request.getRequestDispatcher("/edit.jsp").forward(request, response);
+        String actionType = request.getParameter("action");
+        if (actionType.equals("save") || actionType.equals("delete")) { //Get requests shouldn't update the database, throw an error
+            errorHandlingProcedure(400, request, response);
+        }
+        processRequest(actionType, request, response);
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/list.jsp").forward(request, response);
+        isWellFormedRequest(request, response);
+        processRequest(request.getParameter("action"), request, response);
+    }
+
+    private void processRequest(String actionType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = request.getParameter("username");
+        String title = request.getParameter("title");
+        String body = request.getParameter("body");
+        int postid; 
+        try {
+            postid = Integer.parseInt(request.getParameter("postid"));
+        }
+        catch (NumberFormatException e1) {
+            errorHandlingProcedure(400, request, response);
+        }
+
+        if (actionType.equals("open")) {
+            request.getRequestDispatcher("/edit.jsp").forward(request, response);            
+        } 
+        else if (actionType.equals("save")) {
+            request.getRequestDispatcher("/list.jsp").forward(request, response);            
+        } 
+        else if (actionType.equals("delete")) {
+            request.getRequestDispatcher("/list.jsp").forward(request, response);            
+        }
+        else if (actionType.equals("preview")) {
+            request.getRequestDispatcher("/preview.jsp").forward(request, response);            
+        } 
+        else if (actionType.equals("list")) {
+            request.getRequestDispatcher("/list.jsp").forward(request, response);            
+        }
+    }
+
+    private void getPostsOfUser(String user) {
+        ; // DB retrival of all the posts fo the user
+    }
+
+    private void getPreviewOfPost(String user, int postid, String title, String body) {
+        ; // DB retrival of particular post and change to HTML code
+    }
+
+    private void getRawPost(String user, int postid) {
+        ;
+    }
+
+    private void deletePost(String user, int postid) {
+        ;
+    }
+
+    private void savePost(String user, int postid, String title, String body) {
+        ;
     }
 
     private boolean isWellFormedRequest(HttpServletRequest request, HttpServletResponse response)
@@ -52,28 +106,38 @@ public class Editor extends HttpServlet {
         String title = request.getParameter("title");
         String body = request.getParameter("body");
 
-        if (action == null) {
-            errorHandlingProcedure(400, request, response);
-        } 
-        else if (action.equals("open") && 
-        (username == null || postid == null)) {
-            errorHandlingProcedure(400, request, response);
-        } 
-        else if (action.equals("save") && 
-        (username == null || postid == null || title == null || body == null)) {
-            errorHandlingProcedure(400, request, response);
-        } 
-        else if (action.equals("delete") && 
-        (username == null || postid == null)) {
-            errorHandlingProcedure(400, request, response);
+        try {
+            if (action == null) {
+                errorHandlingProcedure(400, request, response);
+            } 
+            else if (action.equals("open") && 
+            (username == null || postid == null)) {
+                errorHandlingProcedure(400, request, response);
+            } 
+            else if (action.equals("save") && 
+            (username == null || postid == null || title == null || body == null)) {
+                errorHandlingProcedure(400, request, response);
+            } 
+            else if (action.equals("delete") && 
+            (username == null || postid == null)) {
+                errorHandlingProcedure(400, request, response);
+            }
+            else if (action.equals("preview") && 
+            (username == null || postid == null || title == null || body == null)) {
+                errorHandlingProcedure(400, request, response);
+            } 
+            else if (action.equals("list") && 
+            (username == null)) {
+                errorHandlingProcedure(400, request, response);
+            }
+            else {
+                errorHandlingProcedure(400, request, response);
+            }
         }
-        else if (action.equals("preview") && 
-        (username == null || postid == null || title == null || body == null)) {
-            errorHandlingProcedure(400, request, response);
-        } 
-        else if (action.equals("list") && 
-        (username == null)) {
-            errorHandlingProcedure(400, request, response);
+        catch (ServletException | IOException e1) {
+            response.setStatus(500);
+            request.setAttribute("errorMsg", "Internal Server Error");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
         return true;
     }
@@ -85,6 +149,8 @@ public class Editor extends HttpServlet {
             errorMsg = "(Bad Request)";
         else if (errorCode == 404)
             errorMsg = "(Not found)";
+        else if (errorCode >= 500)
+            errorMsg = "Internal Server Error";
 
         try {
             response.setStatus(errorCode);
