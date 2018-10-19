@@ -87,15 +87,15 @@ public class Editor extends HttpServlet {
     }
 
     private void getRawPost(String user, int postid) {
-        ;
+        ; // DB retrival of particular post and display as is
     }
 
     private void deletePost(String user, int postid) {
-        ;
+        ; // delete user's particular post
     }
 
     private void savePost(String user, int postid, String title, String body) {
-        ;
+        ; // Save user's post, possibly update existing entry 
     }
 
     private boolean isWellFormedRequest(HttpServletRequest request, HttpServletResponse response)
