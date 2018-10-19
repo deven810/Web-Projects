@@ -5,11 +5,8 @@
     <title>Edit Post</title>
 </head>
 <body>
-    <%= request.getParameter("body") %>
-    <%= request.getAttribute("bod") %>
-
     <form method="GET" action="post">
-        <button type="submit" name="body" value="<%= request.getParameter("body") %>"> Send </button>
+        <button type="submit" name="body"> <%= request.getParameter("action") %> </button>
     </form>
 </body>
 </html>

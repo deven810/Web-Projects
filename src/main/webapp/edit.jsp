@@ -8,14 +8,14 @@
     <div><h1>Edit Post</h1></div>
     <form method="POST" action="post">
         <div>
-            <button type="submit">Save</button>
-            <button type="submit">Close</button>
-            <button type="submit">Preview</button>
-            <button type="submit">Delete</button>
+            <button type="submit" value="save">Save</button>
+            <button type="submit" value="list">Close</button>
+            <button type="submit" value="preview">Preview</button>
+            <button type="submit" value="delete">Delete</button>
         </div>
         <div>
             <label for="text">Title</label>
-            <input type="text" id="text">
+            <input type="text" name="text" id="text">
         </div>
         <div>
             <label for="body">Body</label>

@@ -36,8 +36,9 @@ public class Editor extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isWellFormedRequest(request, response);
         String actionType = request.getParameter("action");
+        isWellFormedRequest(request, response);
+        
         if (actionType.equals("save") || actionType.equals("delete")) { //Get requests shouldn't update the database, throw an error
             errorHandlingProcedure(400, request, response);
         }
@@ -53,12 +54,15 @@ public class Editor extends HttpServlet {
         String username = request.getParameter("username");
         String title = request.getParameter("title");
         String body = request.getParameter("body");
+        String p = request.getParameter("postid");
         int postid; 
         try {
-            postid = Integer.parseInt(request.getParameter("postid"));
+            if (p != null) {
+                postid = Integer.parseInt(p);                
+            }
         }
         catch (NumberFormatException e1) {
-            errorHandlingProcedure(400, request, response);
+                errorHandlingProcedure(400, request, response);
         }
 
         if (actionType.equals("open")) {
@@ -130,14 +134,19 @@ public class Editor extends HttpServlet {
             (username == null)) {
                 errorHandlingProcedure(400, request, response);
             }
-            else {
+            else if (!(action.equals("list") || 
+            action.equals("preview") ||
+            action.equals("delete") ||
+            action.equals("save") ||
+            action.equals("open"))) {
                 errorHandlingProcedure(400, request, response);
+            }
+            else {
+                return true;
             }
         }
         catch (ServletException | IOException e1) {
-            response.setStatus(500);
-            request.setAttribute("errorMsg", "Internal Server Error");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
+            errorHandlingProcedure(500, request, response);
         }
         return true;
     }
@@ -151,7 +160,10 @@ public class Editor extends HttpServlet {
             errorMsg = "(Not found)";
         else if (errorCode >= 500)
             errorMsg = "Internal Server Error";
-
+        
+            // request.setAttribute("fu", request.getParameter("username")); 
+            // request.getRequestDispatcher("/list.jsp").forward(request, response);            
+        
         try {
             response.setStatus(errorCode);
             request.setAttribute("errorMsg", errorMsg);
