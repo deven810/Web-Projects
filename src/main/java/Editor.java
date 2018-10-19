@@ -58,47 +58,52 @@ public class Editor extends HttpServlet {
         int postid; 
         try {
             if (p != null) {
-                postid = Integer.parseInt(p);                
+                postid = Integer.parseInt(p);   
             }
         }
         catch (NumberFormatException e1) {
-                errorHandlingProcedure(400, request, response);
+            errorHandlingProcedure(400, request, response);
         }
 
         if (actionType.equals("open")) {
             request.getRequestDispatcher("/edit.jsp").forward(request, response);            
         } 
-        else if (actionType.equals("save")) {
+        else if (actionType.equals("save")) { 
+            savePost(username, postid, title, body);
+            getPostsOfUser(username);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         } 
         else if (actionType.equals("delete")) {
+            deletePost(username, postid);
+            getPostsOfUser(username);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
         else if (actionType.equals("preview")) {
             request.getRequestDispatcher("/preview.jsp").forward(request, response);            
         } 
         else if (actionType.equals("list")) {
+            getPostsOfUser(username);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
     }
 
-    private void getPostsOfUser(String user) {
+    private void getPostsOfUser(String username) {
         ; // DB retrival of all the posts fo the user
     }
 
-    private void getPreviewOfPost(String user, int postid, String title, String body) {
+    private void getPreviewOfPost(String username, int postid, String title, String body) {
         ; // DB retrival of particular post and change to HTML code
     }
 
-    private void getRawPost(String user, int postid) {
+    private void getRawPost(String username, int postid) {
         ; // DB retrival of particular post and display as is
     }
 
-    private void deletePost(String user, int postid) {
+    private void deletePost(String username, int postid) {
         ; // delete user's particular post
     }
 
-    private void savePost(String user, int postid, String title, String body) {
+    private void savePost(String username, int postid, String title, String body) {
         ; // Save user's post, possibly update existing entry 
     }
 
@@ -140,9 +145,6 @@ public class Editor extends HttpServlet {
             action.equals("save") ||
             action.equals("open"))) {
                 errorHandlingProcedure(400, request, response);
-            }
-            else {
-                return true;
             }
         }
         catch (ServletException | IOException e1) {
