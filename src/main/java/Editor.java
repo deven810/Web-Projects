@@ -22,13 +22,66 @@ import org.commonmark.renderer.html.HtmlRenderer;
  * Servlet implementation class for Servlet: ConfigurationTest
  *
  */
+
 public class Editor extends HttpServlet {
 
     public Editor() {
+        self.u = new ArrayList<String>();
+        self.pid = 0;
     }
+
+    private ArrayList<String> u;
+    private ArrayList<int> pid;
 
     public void init() throws ServletException {
         /* write any servlet initialization code here or remove this function */
+                /* load the driver */
+                try {
+                    Class.forName("com.mysql.jdbc.Driver");
+                } catch (ClassNotFoundException ex) {
+                    System.out.println(ex);
+                    return;
+                }
+            
+                Connection c = null;
+                Statement  s = null; 
+                ResultSet rs = null; 
+        
+                try {
+
+            
+                    /* create an instance of a Connection object */
+                    c = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
+                    
+                    /* You can think of a JDBC Statement object as a channel
+                    sitting on a connection, and passing one or more of your
+                    SQL statements (which you ask it to execute) to the DBMS*/
+        
+                    s = c.createStatement() ;
+        
+                    s.executeUpdate("DROP TABLE IF EXISTS Posts" ) ;
+                    s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body TEXT, modified TIMESTAMP DEFAULT '2000-01-01 00:00:00', created TIMESTAMP DEFAULT '2000-01-01 00:00:00', PRIMARY KEY(username, postid))");
+                    s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches', ,  ");
+                    rs = s.executeQuery("SELECT * FROM Posts") ;
+                    while( rs.next() ){
+                         self.u.add(rs.getString("username"));
+                         self.pid.add(rs.getInt("postid"));
+                    }
+                } catch (SQLException ex){
+                    System.out.println("SQLException caught");
+                    System.out.println("---");
+                    while ( ex != null ) {
+                        System.out.println("Message   : " + ex.getMessage());
+                        System.out.println("SQLState  : " + ex.getSQLState());
+                        System.out.println("ErrorCode : " + ex.getErrorCode());
+                        System.out.println("---");
+                        ex = ex.getNextException();
+                    }
+                } finally {
+                    try { rs.close(); } catch (Exception e) { /* ignored */ }
+                    try { s.close(); } catch (Exception e) { /* ignored */ }
+                    try { c.close(); } catch (Exception e) { /* ignored */ }
+                }
     }
 
     public void destroy() {
@@ -55,7 +108,7 @@ public class Editor extends HttpServlet {
         String title = request.getParameter("title");
         String body = request.getParameter("body");
         String p = request.getParameter("postid");
-        int postid; 
+        int postid = 0; 
         try {
             if (p != null) {
                 postid = Integer.parseInt(p);   
