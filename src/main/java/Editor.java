@@ -1,5 +1,6 @@
 import java.awt.geom.FlatteningPathIterator;
 import java.io.IOException;
+import java.rmi.ServerException;
 import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,66 +27,56 @@ import org.commonmark.renderer.html.HtmlRenderer;
 public class Editor extends HttpServlet {
 
     public Editor() {
-        self.u = new ArrayList<String>();
-        self.pid = 0;
+        u = new ArrayList<String>();
+        pid = new ArrayList<Integer>();
+        Connection c = null;
+        Statement  s = null; 
+        ResultSet rs = null; 
     }
 
     private ArrayList<String> u;
-    private ArrayList<int> pid;
+    private ArrayList<Integer> pid;
+    private Connection c;
+    private Statement  s;
+    private ResultSet rs;
+    private boolean flag = false;
 
     public void init() throws ServletException {
-        /* write any servlet initialization code here or remove this function */
-                /* load the driver */
-                try {
-                    Class.forName("com.mysql.jdbc.Driver");
-                } catch (ClassNotFoundException ex) {
-                    System.out.println(ex);
-                    return;
-                }
-            
-                Connection c = null;
-                Statement  s = null; 
-                ResultSet rs = null; 
-        
-                try {
+        /* load the driver */
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException ex) {
+            System.out.println(ex);
+            return;
+        }
+        try {
+            /* create an instance of a Connection object */
+            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
+            s = c.createStatement() ;
 
-            
-                    /* create an instance of a Connection object */
-                    c = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
-                    
-                    /* You can think of a JDBC Statement object as a channel
-                    sitting on a connection, and passing one or more of your
-                    SQL statements (which you ask it to execute) to the DBMS*/
-        
-                    s = c.createStatement() ;
-        
-                    s.executeUpdate("DROP TABLE IF EXISTS Posts" ) ;
-                    s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body TEXT, modified TIMESTAMP DEFAULT '2000-01-01 00:00:00', created TIMESTAMP DEFAULT '2000-01-01 00:00:00', PRIMARY KEY(username, postid))");
-                    s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches', ,  ");
-                    rs = s.executeQuery("SELECT * FROM Posts") ;
-                    while( rs.next() ){
-                         self.u.add(rs.getString("username"));
-                         self.pid.add(rs.getInt("postid"));
-                    }
-                } catch (SQLException ex){
-                    System.out.println("SQLException caught");
-                    System.out.println("---");
-                    while ( ex != null ) {
-                        System.out.println("Message   : " + ex.getMessage());
-                        System.out.println("SQLState  : " + ex.getSQLState());
-                        System.out.println("ErrorCode : " + ex.getErrorCode());
-                        System.out.println("---");
-                        ex = ex.getNextException();
-                    }
-                } finally {
-                    try { rs.close(); } catch (Exception e) { /* ignored */ }
-                    try { s.close(); } catch (Exception e) { /* ignored */ }
-                    try { c.close(); } catch (Exception e) { /* ignored */ }
-                }
+            s.executeUpdate("DROP TABLE IF EXISTS Posts" ) ;
+            s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body VARCHAR(100), PRIMARY KEY(username, postid))");
+            s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches')");
+            s.executeUpdate("INSERT INTO Posts VALUES('deven', 1, 'this isn't my first post', 'up dog')");
+
+        } catch (SQLException ex){
+            System.out.println("SQLException caught");
+            System.out.println("---");
+            while ( ex != null ) {
+                System.out.println("Message   : " + ex.getMessage());
+                System.out.println("SQLState  : " + ex.getSQLState());
+                System.out.println("ErrorCode : " + ex.getErrorCode());
+                System.out.println("---");
+                ex = ex.getNextException();
+                flag = true;
+            }
+        } 
     }
 
     public void destroy() {
-        /* write any servlet cleanup code here or remove this function */
+        try { rs.close(); } catch (Exception e) { /* ignored */ }
+        try { s.close(); } catch (Exception e) { /* ignored */ }
+        try { c.close(); } catch (Exception e) { /* ignored */ }
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -123,28 +114,39 @@ public class Editor extends HttpServlet {
         } 
         else if (actionType.equals("save")) { 
             savePost(username, postid, title, body);
-            getPostsOfUser(username);
+            getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         } 
         else if (actionType.equals("delete")) {
             deletePost(username, postid);
-            getPostsOfUser(username);
+            getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
         else if (actionType.equals("preview")) {
             request.getRequestDispatcher("/preview.jsp").forward(request, response);            
         } 
         else if (actionType.equals("list")) {
-            getPostsOfUser(username);
+            getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
     }
 
-    private void getPostsOfUser(String username) {
-        ; // DB retrival of all the posts fo the user
+    private void getPostsOfUser(String username, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            rs = s.executeQuery("SELECT * FROM Posts") ;
+            if (rs.first()) {
+                request.setAttribute("name", rs.getString("username"));                
+            } else {
+                request.setAttribute("name", "yeah basuddy");                
+            }
+            request.getRequestDispatcher("/list.jsp").forward(request, response);            
+        }
+        catch (ServletException | SQLException | IOException e) {
+            errorHandlingProcedure(600, request, response);
+        }
     }
 
-    private void getPreviewOfPost(String username, int postid, String title, String body) {
+    private void getPreviewOfPost(String username, int postid, String title, String body) throws ServletException {
         ; // DB retrival of particular post and change to HTML code
     }
 

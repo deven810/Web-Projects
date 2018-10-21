@@ -13,6 +13,7 @@
         <button type="submit" name="body">
             <%= request.getParameter("action") %> </button>
     </form>
+    <%= request.getAttribute("name") %>
 </body>
 
 </html>
