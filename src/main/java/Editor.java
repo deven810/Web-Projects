@@ -140,7 +140,8 @@ public class Editor extends HttpServlet {
         try {
 
             ArrayList<Post> postList = new ArrayList<Post>();
-            rs = s.executeQuery("SELECT * FROM Posts;");
+            String query = "SELECT * FROM Posts";
+            rs = s.executeQuery(query);
 
             while(rs.next()) {
                 Post p = new Post(rs.getString("username"), rs.getInt("postid"), rs.getString("title"), rs.getString("body"), rs.getString("modified"), rs.getString("created"));
