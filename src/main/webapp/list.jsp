@@ -24,6 +24,7 @@
 
         table {
             border: solid black 1px;
+            width: 50%;
         }
     </style>
 </head>
@@ -34,9 +35,8 @@
             <%= request.getParameter("action") %>
         </button>
     </form>
-    <%= request.getAttribute("name") %>
 
-    <% ArrayList<Post> posts = (ArrayList<Post>)request.getAttribute("postList"); %>
+    <% List<Post> posts = (ArrayList<Post>)request.getAttribute("postList"); %>
     <table>
         <tr>
             <th>Title</th>

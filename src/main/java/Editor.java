@@ -136,23 +136,16 @@ public class Editor extends HttpServlet {
 
             ArrayList<Post> postList = new ArrayList<Post>();
             rs = s.executeQuery("SELECT * FROM Posts") ;
-            if (rs.first()) {
 
-                Post p;
-                
-                while(rs.next()) {
-                    p = new Post( rs.getString("username"), rs.getInt("postid"), rs.getString("title"), rs.getString("body"), rs.getString("modified"), rs.getString("created"));
-                    postList.add(p);
-                }
-
-                request.setAttribute("postList", postList);
-  
-                // request.setAttribute("name", rs.getString("username"));  
-                // request.setAttribute("mtime", rs.getString("modified"));
-                // request.setAttribute("ctime", rs.getString("created"));              
-            } else {
-                request.setAttribute("name", "yeah basuddy");                
+            while(rs.next()) {
+                Post p = new Post(rs.getString("username"), rs.getInt("postid"), rs.getString("title"), rs.getString("body"), rs.getString("modified"), rs.getString("created"));
+                postList.add(p);
             }
+
+        
+
+            request.setAttribute("postList", postList);
+
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
         catch (ServletException | SQLException | IOException e) {

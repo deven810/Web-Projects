@@ -1,12 +1,12 @@
 package Model;
 
 public class Post {
-    public static String username;
-    public static int pid;
-    public static String title;
-    public static String body;
-    public static String mdate;
-    public static String cdate;
+    public String username;
+    public int pid;
+    public String title;
+    public String body;
+    public String mdate;
+    public String cdate;
 
     public static void main(String[] args) {
         System.out.println("Hello");
