@@ -54,10 +54,10 @@ public class Editor extends HttpServlet {
             c = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
             s = c.createStatement() ;
 
-            // s.executeUpdate("DROP TABLE IF EXISTS Posts" ) ;
-            // s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body VARCHAR(100), PRIMARY KEY(username, postid))");
-            // s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches')");
-            // s.executeUpdate("INSERT INTO Posts VALUES('deven', 1, 'this isn't my first post', 'up dog')");
+            // s.executeUpdate("DROP TABLE IF EXISTS Posts;" ) ;
+            // s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body VARCHAR(100), modified TIMESTAMP DEFAULT '2000-01-01 00:00:00', created TIMESTAMP DEFAULT '2000-01-01 00:00:00', PRIMARY KEY(username, postid));");
+            // s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);");
+            // s.executeUpdate("INSERT INTO Posts VALUES('deven', 1, 'this isn't my first post', 'up dog', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);");
 
         } catch (SQLException ex){
             System.out.println("SQLException caught");
@@ -83,7 +83,7 @@ public class Editor extends HttpServlet {
         String actionType = request.getParameter("action");
         isWellFormedRequest(request, response);
         
-        if (actionType.equals("save") || actionType.equals("delete")) { //Get requests shouldn't update the database, throw an error
+        if (actionType.equals("save")) { //Get requests shouldn't update the database, throw an error
             errorHandlingProcedure(400, request, response);
         }
         processRequest(actionType, request, response);
@@ -110,6 +110,7 @@ public class Editor extends HttpServlet {
         }
 
         if (actionType.equals("open")) {
+
             request.getRequestDispatcher("/edit.jsp").forward(request, response);            
         } 
         else if (actionType.equals("save")) { 
@@ -118,7 +119,11 @@ public class Editor extends HttpServlet {
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         } 
         else if (actionType.equals("delete")) {
+
+            try {
             deletePost(username, postid);
+            } catch (SQLException e) {
+            }
             getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
@@ -135,14 +140,12 @@ public class Editor extends HttpServlet {
         try {
 
             ArrayList<Post> postList = new ArrayList<Post>();
-            rs = s.executeQuery("SELECT * FROM Posts") ;
+            rs = s.executeQuery("SELECT * FROM Posts;");
 
             while(rs.next()) {
                 Post p = new Post(rs.getString("username"), rs.getInt("postid"), rs.getString("title"), rs.getString("body"), rs.getString("modified"), rs.getString("created"));
                 postList.add(p);
             }
-
-        
 
             request.setAttribute("postList", postList);
 
@@ -161,12 +164,34 @@ public class Editor extends HttpServlet {
         ; // DB retrival of particular post and display as is
     }
 
-    private void deletePost(String username, int postid) {
-        ; // delete user's particular post
+    private void deletePost(String username, int postid) throws SQLException {
+        // delete user's particular post
+        PreparedStatement preparedStmt = c.prepareStatement("DELETE FROM Posts WHERE username = ? AND postid = ?;");
+        preparedStmt.setString(1, username);
+        preparedStmt.setInt(2, postid);
+
+        try {
+        preparedStmt.executeUpdate();
+        } catch(SQLException e) {
+            System.err.println("SQLException: " + e.getMessage());
+        }
     }
 
     private void savePost(String username, int postid, String title, String body) {
-        ; // Save user's post, possibly update existing entry 
+        // Save user's post, possibly update existing entry 
+        
+        // PreparedStatement preparedStmt = c.prepareStatement("INSERT INTO Posts VALUES(username = ?, postid = ?, title = ?, body = ?, modified = ?, created = ?);");
+        // preparedStmt.setString(1, username);
+        // preparedStmt.setInt(2, postid);
+        // preparedStmt.setString(3, title);
+        // preparedStmt.setString(4, body);
+
+        // try {
+        // preparedStmt.executeUpdate();
+        // } catch(SQLException e) {
+        //     System.err.println("SQLException: " + e.getMessage());
+        // }
+
     }
 
     private boolean isWellFormedRequest(HttpServletRequest request, HttpServletResponse response)

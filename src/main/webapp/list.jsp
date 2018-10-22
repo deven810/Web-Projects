@@ -2,7 +2,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@page import = "Model.Post"%>
 <%@page import = "java.util.*"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page import="java.io.*,java.util.*,java.sql.*"%>
 <%@ page import="javax.servlet.http.*,javax.servlet.*" %>
 
@@ -26,6 +25,18 @@
             border: solid black 1px;
             width: 50%;
         }
+
+        #openButt {
+            background-color: green;
+            color: white;
+            width: 80px;
+        }
+
+        #deleteButt {
+            background-color: red;
+            color: white;
+            width: 80px;
+        }
     </style>
 </head>
 
@@ -42,6 +53,7 @@
             <th>Title</th>
             <th>Created</th>
             <th>Modified</th>
+            <th></th>
         </tr>
         <% for(int i = 0; i < posts.size(); i++) { %>
         <tr>
@@ -54,6 +66,19 @@
             <td>
                 <%= posts.get(i).mdate %>
             </td>
+            <td>
+                <form method="POST" action="post">
+                    <input type="hidden" id="body" name="body" value="<%=posts.get(i).body %>">
+                    <input type="hidden" id="title" name="title" value="<%= posts.get(i).title %>">
+                    <button id="openButt" name="action" value="open">Open</button>
+                </form>
+                <form method="POST" action="post">
+                    <input type="hidden" id="username" name="username" value="<%=posts.get(i).username %>">
+                    <input type="hidden" id="postid" name="postid" value="<%=posts.get(i).pid %>">
+                    <button id="deleteButt" name="action" value="delete">Delete</button>
+                </form>
+            </td>
+
         </tr>
         <% } %>
     </table>
