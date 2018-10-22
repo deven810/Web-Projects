@@ -19,6 +19,8 @@ import org.commonmark.node.*;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
+import Model.Post;
+
 /**
  * Servlet implementation class for Servlet: ConfigurationTest
  *
@@ -26,20 +28,18 @@ import org.commonmark.renderer.html.HtmlRenderer;
 
 public class Editor extends HttpServlet {
 
-    public Editor() {
-        u = new ArrayList<String>();
-        pid = new ArrayList<Integer>();
-        Connection c = null;
-        Statement  s = null; 
-        ResultSet rs = null; 
-    }
-
-    private ArrayList<String> u;
-    private ArrayList<Integer> pid;
     private Connection c;
     private Statement  s;
     private ResultSet rs;
     private boolean flag = false;
+
+    public Editor() {
+        // u = new ArrayList<String>();
+        // pid = new ArrayList<Integer>();
+        c = null;
+        s = null; 
+        rs = null; 
+    }
 
     public void init() throws ServletException {
         /* load the driver */
@@ -54,10 +54,10 @@ public class Editor extends HttpServlet {
             c = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
             s = c.createStatement() ;
 
-            s.executeUpdate("DROP TABLE IF EXISTS Posts" ) ;
-            s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body VARCHAR(100), PRIMARY KEY(username, postid))");
-            s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches')");
-            s.executeUpdate("INSERT INTO Posts VALUES('deven', 1, 'this isn't my first post', 'up dog')");
+            // s.executeUpdate("DROP TABLE IF EXISTS Posts" ) ;
+            // s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body VARCHAR(100), PRIMARY KEY(username, postid))");
+            // s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches')");
+            // s.executeUpdate("INSERT INTO Posts VALUES('deven', 1, 'this isn't my first post', 'up dog')");
 
         } catch (SQLException ex){
             System.out.println("SQLException caught");
@@ -133,9 +133,23 @@ public class Editor extends HttpServlet {
 
     private void getPostsOfUser(String username, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+
+            ArrayList<Post> postList = new ArrayList<Post>();
             rs = s.executeQuery("SELECT * FROM Posts") ;
             if (rs.first()) {
-                request.setAttribute("name", rs.getString("username"));                
+
+                Post p;
+                
+                while(rs.next()) {
+                    p = new Post( rs.getString("username"), rs.getInt("postid"), rs.getString("title"), rs.getString("body"), rs.getString("modified"), rs.getString("created"));
+                    postList.add(p);
+                }
+
+                request.setAttribute("postList", postList);
+  
+                // request.setAttribute("name", rs.getString("username"));  
+                // request.setAttribute("mtime", rs.getString("modified"));
+                // request.setAttribute("ctime", rs.getString("created"));              
             } else {
                 request.setAttribute("name", "yeah basuddy");                
             }
@@ -217,7 +231,7 @@ public class Editor extends HttpServlet {
             errorMsg = "(Not found)";
         else if (errorCode >= 500)
             errorMsg = "Internal Server Error";
-        
+            
             // request.setAttribute("fu", request.getParameter("username")); 
             // request.getRequestDispatcher("/list.jsp").forward(request, response);            
         
