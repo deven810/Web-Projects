@@ -43,7 +43,7 @@
 <body>
     <form method="GET" action="post">
         <button type="submit" name="body">
-            <%= request.getParameter("action") %>
+            New Post
         </button>
     </form>
 

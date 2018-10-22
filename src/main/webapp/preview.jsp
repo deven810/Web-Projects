@@ -13,10 +13,11 @@
         <button type="submit" name="action" value="open">Close Preview</button>
     </form>
     <h1>
-        <%= request.getParameter("title") %>
+
+        ${param.title}
     </h1>
     <p>
-        <%= request.getParameter("body") %>
+        ${param.body}
     </p>
 </body>
 

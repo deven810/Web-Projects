@@ -28,18 +28,10 @@ import Model.Post;
 
 public class Editor extends HttpServlet {
 
-    private Connection c;
-    private Statement  s;
-    private ResultSet rs;
+    // private Connection c;
+    // private Statement  s;
+    // private ResultSet rs;
     private boolean flag = false;
-
-    public Editor() {
-        // u = new ArrayList<String>();
-        // pid = new ArrayList<Integer>();
-        c = null;
-        s = null; 
-        rs = null; 
-    }
 
     public void init() throws ServletException {
         /* load the driver */
@@ -49,35 +41,36 @@ public class Editor extends HttpServlet {
             System.out.println(ex);
             return;
         }
-        try {
+
+        // try {
             /* create an instance of a Connection object */
-            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
-            s = c.createStatement() ;
+            
+            // s = c.createStatement() ;
 
             // s.executeUpdate("DROP TABLE IF EXISTS Posts;" ) ;
             // s.executeUpdate("CREATE TABLE Posts(username VARCHAR(40), postid INTEGER, title VARCHAR(100), body VARCHAR(100), modified TIMESTAMP DEFAULT '2000-01-01 00:00:00', created TIMESTAMP DEFAULT '2000-01-01 00:00:00', PRIMARY KEY(username, postid));");
             // s.executeUpdate("INSERT INTO Posts VALUES('haejin', 1, 'this my first post', 'hullo bitches', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);");
             // s.executeUpdate("INSERT INTO Posts VALUES('deven', 1, 'this isn't my first post', 'up dog', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);");
 
-        } catch (SQLException ex){
-            System.out.println("SQLException caught");
-            System.out.println("---");
-            while ( ex != null ) {
-                System.out.println("Message   : " + ex.getMessage());
-                System.out.println("SQLState  : " + ex.getSQLState());
-                System.out.println("ErrorCode : " + ex.getErrorCode());
-                System.out.println("---");
-                ex = ex.getNextException();
-                flag = true;
-            }
-        } 
+        // } catch (SQLException ex){
+        //     System.out.println("SQLException caught");
+        //     System.out.println("---");
+        //     while ( ex != null ) {
+        //         System.out.println("Message   : " + ex.getMessage());
+        //         System.out.println("SQLState  : " + ex.getSQLState());
+        //         System.out.println("ErrorCode : " + ex.getErrorCode());
+        //         System.out.println("---");
+        //         ex = ex.getNextException();
+        //         flag = true;
+        //     }
+        // } 
     }
 
-    public void destroy() {
-        try { rs.close(); } catch (Exception e) { /* ignored */ }
-        try { s.close(); } catch (Exception e) { /* ignored */ }
-        try { c.close(); } catch (Exception e) { /* ignored */ }
-    }
+    // public void destroy() {
+    //     try { rs.close(); } catch (Exception e) { /* ignored */ }
+    //     try { s.close(); } catch (Exception e) { /* ignored */ }
+    //     try { c.close(); } catch (Exception e) { /* ignored */ }
+    // }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String actionType = request.getParameter("action");
@@ -96,6 +89,10 @@ public class Editor extends HttpServlet {
     }
 
     private void processRequest(String actionType, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement preparedStmt = null;
+
         String username = request.getParameter("username");
         String title = request.getParameter("title");
         String body = request.getParameter("body");
@@ -110,21 +107,22 @@ public class Editor extends HttpServlet {
             errorHandlingProcedure(400, request, response);
         }
 
+        try {
+        conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
         if (actionType.equals("open")) {
             request.getRequestDispatcher("/edit.jsp").forward(request, response);            
         } 
         else if (actionType.equals("save")) { 
             
-            try {
-                PreparedStatement preparedStmt = c.prepareStatement("SELECT 1 FROM Posts WHERE username=? AND postid=?");
+                preparedStmt = conn.prepareStatement("SELECT 1 FROM Posts WHERE username=? AND postid=?");
                 preparedStmt.setString(1, username);
                 preparedStmt.setInt(2, postid);
 
-                ResultSet r = preparedStmt.executeQuery();
+                 rs = preparedStmt.executeQuery();
                
 
                 // if this post already exists in Posts table
-                if(r.first()) {
+                if(rs.first()) {
                     request.setAttribute("fu", title); 
                     savePost(username, postid, title, body);
                 }
@@ -136,9 +134,7 @@ public class Editor extends HttpServlet {
             getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response); 
 
-            } catch(SQLException e) {
-                System.out.println("SQLException: " + e.getMessage());
-            }
+    
         } 
         else if (actionType.equals("delete")) {
 
@@ -153,15 +149,27 @@ public class Editor extends HttpServlet {
         else if (actionType.equals("preview")) {
             request.getRequestDispatcher("/preview.jsp").forward(request, response);            
         } 
-        else if (actionType.equals("list") || actionType.equals("close")) {
+        else if (actionType.equals("list")) {
             getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
-    }
+    } catch(SQLException e) {
+        System.out.println("SQLException: " + e.getMessage());
+    } finally {
+            try {rs.close();} catch (Exception e) { /* ignored */}
+            try { preparedStmt.close(); } catch (Exception e) { /*ignored */}
+            try { conn.close(); } catch (Exception e) { /* ignored */}
+        }
+    } /* end of processRequest */
 
     private void getPostsOfUser(String username, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
+        Connection conn = null;
+        ResultSet rs = null;
+        Statement s = null;
 
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
+            s = conn.createStatement();
             ArrayList<Post> postList = new ArrayList<Post>();
             String query = "SELECT * FROM Posts ORDER BY postid ASC;";
             rs = s.executeQuery(query);
@@ -177,6 +185,10 @@ public class Editor extends HttpServlet {
         }
         catch (ServletException | SQLException | IOException e) {
             errorHandlingProcedure(600, request, response);
+        } finally {
+            try { rs.close();} catch (Exception e) { /* ignored */}
+            try { s.close(); } catch (Exception e) { /*ignored */}
+            try { conn.close(); } catch (Exception e) { /* ignored */}
         }
     }
 
@@ -190,7 +202,11 @@ public class Editor extends HttpServlet {
 
     private void deletePost(String username, int postid) throws SQLException {
         // delete user's particular post
-        PreparedStatement preparedStmt = c.prepareStatement("DELETE FROM Posts WHERE username = ? AND postid = ?;");
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement preparedStmt = null;
+
+        preparedStmt = conn.prepareStatement("DELETE FROM Posts WHERE username = ? AND postid = ?;");
         preparedStmt.setString(1, username);
         preparedStmt.setInt(2, postid);
 
@@ -198,45 +214,50 @@ public class Editor extends HttpServlet {
         preparedStmt.executeUpdate();
         } catch(SQLException e) {
             System.err.println("SQLException: " + e.getMessage());
-        }
+        } finally {
+        try {rs.close();} catch (Exception e) { /* ignored */}
+        try { preparedStmt.close(); } catch (Exception e) { /*ignored */}
+        try { conn.close(); } catch (Exception e) { /* ignored */}
+    }
     }
 
     private void savePost(String username, int postid, String title, String body) throws SQLException {
         // Save user's post, possibly update existing entry 
-        
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
+        ResultSet rs = null;
+        PreparedStatement preparedStmt = null;
         try {
               
             
         if (postid <= 0) {
-            PreparedStatement preparedStmt = c.prepareStatement("INSERT INTO Posts VALUES(username = ?, postid = ?, title = ?, body = ?, modified = CURRENT_TIMESTAMP, created = CURRENT_TIMESTAMP);");
+            preparedStmt = conn.prepareStatement("INSERT INTO Posts VALUES(username = ?, postid = ?, title = ?, body = ?, modified = CURRENT_TIMESTAMP, created = CURRENT_TIMESTAMP);");
             preparedStmt.setString(1, username);
             preparedStmt.setInt(2, postid);
             preparedStmt.setString(3, title);
             preparedStmt.setString(4, body);
-            try {
+    
                 preparedStmt.executeUpdate();
-                } catch(SQLException e) {
-                    System.err.println("SQLException: " + e.getMessage());
-                }
         }
 
         else {
-            PreparedStatement preparedStmt = c.prepareStatement("UPDATE Posts SET title=?, body = ?, modified = CURRENT_TIMESTAMP WHERE username = ? AND postid=?;");
+            preparedStmt = conn.prepareStatement("UPDATE Posts SET title=?, body = ?, modified = CURRENT_TIMESTAMP WHERE username = ? AND postid=?;");
             preparedStmt.setString(1, title);
             preparedStmt.setString(2, body);
             preparedStmt.setString(3, username);
             preparedStmt.setInt(4, postid);
-            try {
+  
                 preparedStmt.executeUpdate();
-                } catch(SQLException e) {
-                    System.err.println("SQLException: " + e.getMessage());
-                }
+
         }
 
 
             } catch(SQLException e) {
                 System.err.println("SQLException: " + e.getMessage());
-            }
+            }  finally {
+            try {rs.close();} catch (Exception e) { /* ignored */}
+            try { preparedStmt.close(); } catch (Exception e) { /*ignored */}
+            try { conn.close(); } catch (Exception e) { /* ignored */}
+        }
 
     }
 
