@@ -21,15 +21,21 @@
         </div>
         <div>
             <label for="title">Title</label>
-            <input type="text" name="title" id="title" value="<%= request.getParameter(\" title\") %>">
+            <input type="text" name="title" id="title" value="${param.title}" />
         </div>
         <div>
             <label for="body">Body</label>
-            <textarea style="height: 20rem;" name="body" id="body" value="<%= request.getParameter(\" body\") %>"></textarea>
+            <textarea id="body" style="height: 20rem;" name="body">${param.body}</textarea>
         </div>
         <div>
-            <input type="hidden" id="postid" name="postid" value="<%= request.getAttribute(\" postid\") %>">
-            <input type="hidden" id="username" name="username" value="<%= request.getAttribute(\" username\") %>">
+            ${param.postid}
+            ${param.username}
+            ${param.title}
+            ${param.body}
+            <input type="hidden" name="postid" value="${param.postid}" />
+            <input type="hidden" name="username" value="${param.username}" />
+            <input type="hidden" name="title" value="${param.title}" />
+            <input type="hidden" name="body" value="${param.body}" />
         </div>
     </form>
 </body>

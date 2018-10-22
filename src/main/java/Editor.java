@@ -83,7 +83,7 @@ public class Editor extends HttpServlet {
         String actionType = request.getParameter("action");
         isWellFormedRequest(request, response);
         
-        if (actionType.equals("save")) { //Get requests shouldn't update the database, throw an error
+        if (actionType.equals("save") || actionType.equals("delete")) { //Get requests shouldn't update the database, throw an error
             errorHandlingProcedure(400, request, response);
         }
         processRequest(actionType, request, response);
@@ -91,6 +91,7 @@ public class Editor extends HttpServlet {
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         isWellFormedRequest(request, response);
+        System.out.println("posted, bitch");
         processRequest(request.getParameter("action"), request, response);
     }
 
@@ -110,13 +111,34 @@ public class Editor extends HttpServlet {
         }
 
         if (actionType.equals("open")) {
-
             request.getRequestDispatcher("/edit.jsp").forward(request, response);            
         } 
         else if (actionType.equals("save")) { 
-            savePost(username, postid, title, body);
+            
+            try {
+                PreparedStatement preparedStmt = c.prepareStatement("SELECT 1 FROM Posts WHERE username=? AND postid=?");
+                preparedStmt.setString(1, username);
+                preparedStmt.setInt(2, postid);
+
+                ResultSet r = preparedStmt.executeQuery();
+               
+
+                // if this post already exists in Posts table
+                if(r.first()) {
+                    request.setAttribute("fu", title); 
+                    savePost(username, postid, title, body);
+                }
+                
+                else { // apply different "save new" logic to new Post
+                request.setAttribute("fu", username); 
+                savePost(username, 0, title, body);
+            }
             getPostsOfUser(username, request, response);
-            request.getRequestDispatcher("/list.jsp").forward(request, response);            
+            request.getRequestDispatcher("/list.jsp").forward(request, response); 
+
+            } catch(SQLException e) {
+                System.out.println("SQLException: " + e.getMessage());
+            }
         } 
         else if (actionType.equals("delete")) {
 
@@ -127,10 +149,11 @@ public class Editor extends HttpServlet {
             getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
+
         else if (actionType.equals("preview")) {
             request.getRequestDispatcher("/preview.jsp").forward(request, response);            
         } 
-        else if (actionType.equals("list")) {
+        else if (actionType.equals("list") || actionType.equals("close")) {
             getPostsOfUser(username, request, response);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
@@ -140,7 +163,7 @@ public class Editor extends HttpServlet {
         try {
 
             ArrayList<Post> postList = new ArrayList<Post>();
-            String query = "SELECT * FROM Posts";
+            String query = "SELECT * FROM Posts ORDER BY postid ASC;";
             rs = s.executeQuery(query);
 
             while(rs.next()) {
@@ -178,22 +201,47 @@ public class Editor extends HttpServlet {
         }
     }
 
-    private void savePost(String username, int postid, String title, String body) {
+    private void savePost(String username, int postid, String title, String body) throws SQLException {
         // Save user's post, possibly update existing entry 
         
-        // PreparedStatement preparedStmt = c.prepareStatement("INSERT INTO Posts VALUES(username = ?, postid = ?, title = ?, body = ?, modified = ?, created = ?);");
-        // preparedStmt.setString(1, username);
-        // preparedStmt.setInt(2, postid);
-        // preparedStmt.setString(3, title);
-        // preparedStmt.setString(4, body);
+        try {
+              
+            
+        if (postid <= 0) {
+            PreparedStatement preparedStmt = c.prepareStatement("INSERT INTO Posts VALUES(username = ?, postid = ?, title = ?, body = ?, modified = CURRENT_TIMESTAMP, created = CURRENT_TIMESTAMP);");
+            preparedStmt.setString(1, username);
+            preparedStmt.setInt(2, postid);
+            preparedStmt.setString(3, title);
+            preparedStmt.setString(4, body);
+            try {
+                preparedStmt.executeUpdate();
+                } catch(SQLException e) {
+                    System.err.println("SQLException: " + e.getMessage());
+                }
+        }
 
-        // try {
-        // preparedStmt.executeUpdate();
-        // } catch(SQLException e) {
-        //     System.err.println("SQLException: " + e.getMessage());
-        // }
+        else {
+            PreparedStatement preparedStmt = c.prepareStatement("UPDATE Posts SET title=?, body = ?, modified = CURRENT_TIMESTAMP WHERE username = ? AND postid=?;");
+            preparedStmt.setString(1, title);
+            preparedStmt.setString(2, body);
+            preparedStmt.setString(3, username);
+            preparedStmt.setInt(4, postid);
+            try {
+                preparedStmt.executeUpdate();
+                } catch(SQLException e) {
+                    System.err.println("SQLException: " + e.getMessage());
+                }
+        }
+
+
+            } catch(SQLException e) {
+                System.err.println("SQLException: " + e.getMessage());
+            }
 
     }
+
+
+    
 
     private boolean isWellFormedRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -260,7 +308,7 @@ public class Editor extends HttpServlet {
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         } catch (ServletException | IOException e1) {
             response.setStatus(500);
-            errorMsg = "Internal Server Error";
+            errorMsg = "FUUU Internal Server Error";
             request.setAttribute("errorMsg", errorMsg);
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }

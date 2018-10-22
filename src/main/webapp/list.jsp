@@ -68,6 +68,8 @@
             </td>
             <td>
                 <form method="POST" action="post">
+                    <input type="hidden" id="username" name="username" value="<%=posts.get(i).username %>">
+                    <input type="hidden" id="postid" name="postid" value="<%=posts.get(i).pid %>">
                     <input type="hidden" id="body" name="body" value="<%=posts.get(i).body %>">
                     <input type="hidden" id="title" name="title" value="<%= posts.get(i).title %>">
                     <button id="openButt" name="action" value="open">Open</button>
@@ -82,6 +84,8 @@
         </tr>
         <% } %>
     </table>
+
+    <%=request.getAttribute("fu") %>
 
 </body>
 
