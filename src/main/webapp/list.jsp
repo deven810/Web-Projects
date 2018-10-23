@@ -41,14 +41,17 @@
 </head>
 
 <body>
-    <form method="GET" action="post" name="action" value="open">
-        <input type="hidden" id="postid" value="0">
-        <button type="submit" name="body">
+    <% List<Post> posts = (ArrayList<Post>)request.getAttribute("postList"); %>
+    <form method="GET" action="post">
+        <input type="hidden" name="postid" value="0">
+        <input type="hidden" name="username" value="<%= posts.get(0).username %>">
+        <input type="hidden" name="body" value="">
+        <input type="hidden" name="title" value="">
+        <button type="submit" name="action" value="open">
             New Post
         </button>
     </form>
 
-    <% List<Post> posts = (ArrayList<Post>)request.getAttribute("postList"); %>
     <table>
         <tr>
             <th>Title</th>
@@ -68,16 +71,16 @@
                 <%= posts.get(i).mdate %>
             </td>
             <td>
-                <form method="POST" action="post">
-                    <input type="hidden" id="username" name="username" value="<%=posts.get(i).username %>">
-                    <input type="hidden" id="postid" name="postid" value="<%=posts.get(i).pid %>">
-                    <input type="hidden" id="body" name="body" value="<%=posts.get(i).body %>">
-                    <input type="hidden" id="title" name="title" value="<%= posts.get(i).title %>">
+                <form method="POST" name="open" action="post">
+                    <input type="hidden" name="username" value="<%=posts.get(i).username %>">
+                    <input type="hidden" name="postid" value="<%=posts.get(i).pid %>">
+                    <input type="hidden" name="body" value="<%=posts.get(i).body %>">
+                    <input type="hidden" name="title" value="<%= posts.get(i).title %>">
                     <button id="openButt" name="action" value="open">Open</button>
                 </form>
-                <form method="POST" action="post">
-                    <input type="hidden" id="username" name="username" value="<%=posts.get(i).username %>">
-                    <input type="hidden" id="postid" name="postid" value="<%=posts.get(i).pid %>">
+                <form method="POST" name="delete" action="post">
+                    <input type="hidden" name="username" value="<%=posts.get(i).username %>">
+                    <input type="hidden" name="postid" value="<%=posts.get(i).pid %>">
                     <button id="deleteButt" name="action" value="delete">Delete</button>
                 </form>
             </td>
@@ -85,9 +88,5 @@
         </tr>
         <% } %>
     </table>
-
-    <%=request.getAttribute("fu") %>
-
 </body>
-
 </html>

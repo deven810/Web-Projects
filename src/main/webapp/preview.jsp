@@ -11,14 +11,17 @@
 <body>
     <form method="POST" action="post">
         <button type="submit" name="action" value="open">Close Preview</button>
+        <input type="hidden" name="postid" value="${param.postid}" />
+        <input type="hidden" name="username" value="${param.username}" />
+        <input type="hidden" name="title" value="${param.title}" />
+        <input type="hidden" name="body" value="${param.body}" />
     </form>
     <h1>
-
         ${param.title}
     </h1>
     <p>
-        ${param.body}
+        ${md}
     </p>
 </body>
-
+        
 </html>

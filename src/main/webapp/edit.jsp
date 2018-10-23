@@ -12,7 +12,7 @@
     <div>
         <h1>Edit Post</h1>
     </div>
-    <form method="POST" action="post">
+    <form method="GET" action="post">
         <div>
             <button type="submit" name="action" value="save">Save</button>
             <button type="submit" name="action" value="list">Close</button>
@@ -34,8 +34,6 @@
             ${param.body}
             <input type="hidden" name="postid" value="${param.postid}" />
             <input type="hidden" name="username" value="${param.username}" />
-            <input type="hidden" name="title" value="${param.title}" />
-            <input type="hidden" name="body" value="${param.body}" />
         </div>
     </form>
 </body>
