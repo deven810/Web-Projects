@@ -224,15 +224,28 @@ public class Editor extends HttpServlet {
     private void savePost(String username, int postid, String title, String body) throws SQLException {
         // Save user's post, possibly update existing entry 
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
-        ResultSet rs = null;
+        ResultSet rs= null;
         PreparedStatement preparedStmt = null;
         try {
               
             
         if (postid <= 0) {
+            preparedStmt = conn.prepareStatement("SELECT MAX(postid) AS highestID FROM Posts WHERE username = ?"); //returns null if empty table
+            preparedStmt.setString(1, username); // max id for THIS particular user
+
+            rs = preparedStmt.executeQuery();
+            int newId = 0;
+            if(rs.next()) {
+                newId = rs.getInt("highestID"); // insert the next highest possible ID
+                newId++;
+            }
+            else {
+                newId = 1; // if this is the first post this user has made
+            }
+
             preparedStmt = conn.prepareStatement("INSERT INTO Posts VALUES(username = ?, postid = ?, title = ?, body = ?, modified = CURRENT_TIMESTAMP, created = CURRENT_TIMESTAMP);");
             preparedStmt.setString(1, username);
-            preparedStmt.setInt(2, postid);
+            preparedStmt.setInt(2, newId);
             preparedStmt.setString(3, title);
             preparedStmt.setString(4, body);
     

@@ -41,7 +41,8 @@
 </head>
 
 <body>
-    <form method="GET" action="post">
+    <form method="GET" action="post" name="action" value="open">
+        <input type="hidden" id="postid" value="0">
         <button type="submit" name="body">
             New Post
         </button>
