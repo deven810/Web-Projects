@@ -143,7 +143,7 @@ public class Editor extends HttpServlet {
             }
         } 
         catch(SQLException e) {
-            System.out.println("SQLException: " + e.getMessage());
+            errorHandlingProcedure(500, request, response);
         } 
         finally {
             try {rs.close();} catch (Exception e) { /* ignored */}
@@ -219,7 +219,7 @@ public class Editor extends HttpServlet {
 
 
         } catch(SQLException e) {
-            System.err.println("SQLException: " + e.getMessage());
+            errorHandlingProcedure(500, request, response);
         }  finally {
         try {rs.close();} catch (Exception e) { /* ignored */}
         try { preparedStmt.close(); } catch (Exception e) { /*ignored */}
@@ -244,12 +244,12 @@ public class Editor extends HttpServlet {
                 Post p = new Post(rs.getString("username"), rs.getInt("postid"), rs.getString("title"), rs.getString("body"), rs.getString("modified"), rs.getString("created"));
                 postList.add(p);
             }
-
+            request.setAttribute("un", username);
             request.setAttribute("postList", postList);
             request.getRequestDispatcher("/list.jsp").forward(request, response);            
         }
         catch (ServletException | SQLException | IOException e) {
-            errorHandlingProcedure(600, request, response);
+            errorHandlingProcedure(500, request, response);
         } finally {
             try { rs.close();} catch (Exception e) { /* ignored */}
             try { preparedStmt.close(); } catch (Exception e) { /* ignored */}

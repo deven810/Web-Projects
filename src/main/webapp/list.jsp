@@ -44,7 +44,7 @@
     <% List<Post> posts = (ArrayList<Post>)request.getAttribute("postList"); %>
     <form method="POST" action="post">
         <input type="hidden" name="postid" value="0">
-        <input type="hidden" name="username" value="<%= posts.get(0).username %>">
+        <input type="hidden" name="username" value="${un}">
         <input type="hidden" name="body" value="">
         <input type="hidden" name="title" value="">
         <button type="submit" name="action" value="open">
