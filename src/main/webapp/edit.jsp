@@ -12,7 +12,7 @@
     <div>
         <h1>Edit Post</h1>
     </div>
-    <form method="GET" action="post">
+    <form method="POST" action="post">
         <div>
             <button type="submit" name="action" value="save">Save</button>
             <button type="submit" name="action" value="list">Close</button>
@@ -28,10 +28,6 @@
             <textarea id="body" style="height: 20rem;" name="body">${param.body}</textarea>
         </div>
         <div>
-            ${param.postid}
-            ${param.username}
-            ${param.title}
-            ${param.body}
             <input type="hidden" name="postid" value="${param.postid}" />
             <input type="hidden" name="username" value="${param.username}" />
         </div>

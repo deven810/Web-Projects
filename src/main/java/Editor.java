@@ -80,8 +80,7 @@ public class Editor extends HttpServlet {
         String actionType = request.getParameter("action");
         isWellFormedRequest(request, response);
 
-        // if (actionType.equals("save") || actionType.equals("delete")) { //Get requests shouldn't update the database, throw an error
-        if(false){
+        if (actionType.equals("save") || actionType.equals("delete")) { //Get requests shouldn't update the database, throw an error
            errorHandlingProcedure(400, request, response);
         } else {
             processRequest(actionType, request, response);            
@@ -113,7 +112,6 @@ public class Editor extends HttpServlet {
             errorHandlingProcedure(400, request, response);
         }
 
-
         try {
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
    
@@ -121,25 +119,16 @@ public class Editor extends HttpServlet {
                 request.getRequestDispatcher("/edit.jsp").forward(request, response);            
             } 
             else if (actionType.equals("save")) { 
-                // preparedStmt = conn.prepareStatement("SELECT 1 FROM Posts WHERE username=? AND postid=?");
-                // preparedStmt.setString(1, username);
-                // preparedStmt.setInt(2, postid);
-                // rs = preparedStmt.executeQuery();
-               
-                // // if this post already exists in Posts table
-                // if(rs.first()) {
-                //     savePost(username, postid, title, body, request, response);
-                // }
-                // else { // apply different "save new" logic to new Post
-                    savePost(username, postid, title, body, request, response);
-                // }
+                savePost(username, postid, title, body, request, response);
                 getPostsOfUser(username, request, response);
                 request.getRequestDispatcher("/list.jsp").forward(request, response); 
             } 
             else if (actionType.equals("delete")) {
                 try {
                     deletePost(username, postid, request, response);
-                } catch (SQLException e) { }
+                } catch (SQLException e) { 
+                    errorHandlingProcedure(500, request, response);
+                }
 
                 getPostsOfUser(username, request, response);
                 request.getRequestDispatcher("/list.jsp").forward(request, response);            
@@ -176,15 +165,14 @@ public class Editor extends HttpServlet {
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement preparedStmt = null;
-
-        preparedStmt = conn.prepareStatement("DELETE FROM Posts WHERE username = ? AND postid = ?;");
-        preparedStmt.setString(1, username);
-        preparedStmt.setInt(2, postid);
-
         try {
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CS144", "cs144", ""); 
+            preparedStmt = conn.prepareStatement("DELETE FROM Posts WHERE username = ? AND postid = ?;");
+            preparedStmt.setString(1, username);
+            preparedStmt.setInt(2, postid);
             preparedStmt.executeUpdate();
         } catch(SQLException e) {
-            System.err.println("SQLException: " + e.getMessage());
+            errorHandlingProcedure(501, request, response);
         } finally {
             try {rs.close();} catch (Exception e) { /* ignored */}
             try { preparedStmt.close(); } catch (Exception e) { /* ignored */}
