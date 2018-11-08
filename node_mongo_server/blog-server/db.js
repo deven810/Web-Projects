@@ -1,27 +1,31 @@
 const MongoClient = require('mongodb').MongoClient;
-
 const MONGODB_URI = 'mongodb://localhost:27017/BlogServer';
-let database;
 
+let database;
 async function connect(url = "Posts", query = "") {
-  await MongoClient.connect(MONGODB_URI, { useNewUrlParser: true }, function (err, db) {
-    if (err) {
-      console.log(err);
-    }
-    else {
-      database = db.db("BlogServer");
-    }
-  });
-}; 
+
+  await MongoClient.connect(MONGODB_URI)
+    .then(function (db) {
+      database = db;
+    })
+    .catch(function (err) { console.log(err); })
+};
+
 connect();
-function searchInPosts(query) {
-  database.collection("Posts").findOne(query, (err, value) => {
-    if (err) {
-      throw err;
-    } else {
-      console.log(value) 
-    }
-  });
+
+module.exports.searchInPosts = async function (query) {
+  let returnedData;
+  try {
+    await database.collection("Posts").findOne(query)
+      .then((val) => {
+        if (val) returnedData = val;
+        console.log(val);
+      });
+
+    return returnedData;
+  } catch (e) {
+    console.log("error searching for db query " + e);
+  }
 }
 
-module.exports = searchInPosts;
+
