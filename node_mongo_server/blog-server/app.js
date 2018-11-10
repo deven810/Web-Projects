@@ -7,7 +7,7 @@ const assert = require('assert');
 
 var indexRouter = require('./routes/index');
 var blogRouter = require('./routes/blog');
-var loginRouter = require('./routes/blog');
+var loginRouter = require('./routes/login');
 var apiRouter = require('./routes/blog');
 
 let client;
