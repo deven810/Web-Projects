@@ -64,6 +64,22 @@ module.exports.searchInPosts = async function (query) {
   }
 }
 
+module.exports.getPostsInRange = async function (query, range, first) {
+  try {
+    let postArr = [];
+    let cursor = await database.collection("Posts").find(query, { postid: { $gte: first } }).limit(range);
+    while (cursor.hasNext()) {
+      postArr.push(cursor);
+      cursor.next();
+    }
+    return postArr;
+  }
+  catch (e) {
+    console.log('caught error getting posts in range', e);
+    throw e;
+  }
+}
+
 // U
 module.exports.updatePost = async (query, title, body, time) => {
   try {
