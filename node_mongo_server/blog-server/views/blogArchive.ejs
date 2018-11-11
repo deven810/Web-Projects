@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<html>
+
+
+<head>
+    <title>
+        Blog Posts
+    </title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+    <h1>
+        Blog Post Archive
+    </h1>
+        <% 
+        for (var i = 0; i < size; i++) {
+            let currPost = postArray[i]; %>
+            <%- currPost.title %>
+            <%- currPost.body %>
+        </br>
+        </br>
+        <% } %>
+
+        <% if(remaining) {%> 
+            <a href='<%="/blog/"+user +"/?start="+next%>' id="next" class="btn btn-default">Next</a>
+        <% } %>
+
+</body>
+
+</html>

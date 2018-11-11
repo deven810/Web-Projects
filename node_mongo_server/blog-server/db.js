@@ -52,7 +52,7 @@ module.exports.searchInPosts = async function (query) {
       .then((val) => {
         // if (val) returnedData = val; 
         returnedData = val; //Process bad data in the controller
-        console.log(val);
+        // console.log(val);
       })
       .catch((err) => {
         throw err;
@@ -61,6 +61,22 @@ module.exports.searchInPosts = async function (query) {
     return returnedData;
   } catch (e) {
     console.log("error searching for db query " + e);
+  }
+}
+
+module.exports.getPostsInRange = async function (query, range, first) {
+  try {
+    let postArr = await database.collection("Posts")
+    .find({$and: [query, { postid: { $gte: first } }]})
+    .limit(range)
+    .sort({postd:1})
+    .toArray();
+
+    return postArr;
+  }
+  catch (e) {
+    console.log('caught error getting posts in range', e);
+    throw e;
   }
 }
 
