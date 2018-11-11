@@ -15,18 +15,18 @@
     <h1>
         Blog Post Archive
     </h1>
-        <% 
+    <% 
         for (var i = 0; i < size; i++) {
             let currPost = postArray[i]; %>
-            <%- currPost.title %>
-            <%- currPost.body %>
-        </br>
-        </br>
-        <% } %>
+    <%- currPost.title %>
+    <%- currPost.body %>
+    </br>
+    </br>
+    <% } %>
 
-        <% if(remaining) {%> 
-            <a href='<%="/blog/"+user +"/?start="+next%>' id="next" class="btn btn-default">Next</a>
-        <% } %>
+    <% if(remaining) {%>
+    <a href='<%="/blog/"+user +"/?start="+next%>' id="next" class="btn btn-default">Next</a>
+    <% } %>
 
 </body>
 

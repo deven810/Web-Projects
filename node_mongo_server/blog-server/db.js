@@ -67,11 +67,11 @@ module.exports.searchInPosts = async function (query) {
 module.exports.getPostsInRange = async function (query, range, first) {
   try {
     let postArr = await database.collection("Posts")
-    .find({$and: [query, { postid: { $gte: first } }]})
-    .limit(range)
-    .sort({postd:1})
-    .toArray();
+      .find({ $and: [query, { postid: { $gte: first } }] })
+      .sort({ postid: 1 })
+      .toArray();
 
+    console.log(postArr);
     return postArr;
   }
   catch (e) {
