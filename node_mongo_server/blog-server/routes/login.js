@@ -34,7 +34,7 @@ router.post('/', function (req, res, next) {
                 res.cookie('jwt', cookie, {expires: 0});
             }
     
-            if (redir == "") {
+            if (redir == "" || redir == undefined || redir == null) {
                 if (status) {
                     res.status(200);
                 } else {

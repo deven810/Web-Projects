@@ -1,3 +1,4 @@
+let jwt = require('jsonwebtoken');
 let express = require('express');
 let router = express.Router();
 let getPostsFor = require('../db.js').getAllPosts;
@@ -5,6 +6,8 @@ let searchPosts = require('../db.js').searchInPosts;
 let deletePost = require('../db.js').deletePost;
 let updatePost = require('../db.js').updatePost;
 let insertPost = require('../db.js').insertPost;
+
+const secret = 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c'
 
 /*========================================================================================================================
 If a request does not meet our requirements (such as not formatting data in JSON, not including required data, etc.), 
@@ -23,15 +26,34 @@ function isJSON(item) {
     return true;
 }
 
+function isValidUser(cookie, username) {
+    try {
+        cookie = jwt.verify(cookie.jwt, secret)
+        console.log(cookie)
+        console.log(Date.now()/1000)
+        if (cookie.exp < (Date.now()/1000) || cookie.usr != username) {
+            return false; 
+        } 
+        return true; 
+    }
+    catch (err) {
+        return false;
+    }
+}
+
 // Root API path will just respond with all data in the DB (not required by the spec, I just decided)
 router.get('/', (req, res, next) => {
-    getPostsFor({})
+    if(isValidUser(req.cookies, user)) {
+        getPostsFor({})
         .then(posts => {
             res.send(posts);
         })
         .catch(e => {
             console.log("error getting all posts in database for root api path");
         })
+    } else {
+        res.status(401).send('401: Unauthorized')
+    }
 });
 
 /*========================================================================================================================
@@ -55,6 +77,7 @@ router.post('/:username/:postid', (req, res, next) => {
     let query = { postid: id, username: user, created: c, modified: m, title: title, body: body }
     let queryForExistence = { postid: id, username: user };
     // If the insertion is successful, the server should reply with “201 (Created)” status code
+    if(isValidUser(req.cookies, user)) {
     searchPosts(queryForExistence)
         .then(post => {
 
@@ -79,6 +102,9 @@ router.post('/:username/:postid', (req, res, next) => {
         .catch(err => {
             console.log('caught error in searchPosts in api.js');
         });
+    } else {
+        res.status(401).send('401: Unauthorized')
+    }
 });
 
 /*========================================================================================================================
@@ -89,13 +115,17 @@ Each post in the array must have at least five fields, postid, title, body, crea
 The response status code should be “200 (OK)”.
 ========================================================================================================================*/
 router.get('/:username', (req, res) => {
-    getPostsFor({ username: req.params.username })
+    if(isValidUser(req.cookies, req.params.username)) {
+        getPostsFor({ username: req.params.username })
         .then(posts => {
             res.status(200).send(posts);
         })
         .catch(e => {
             console.log("error getting posts for api.js\n", e);
         });
+    } else {
+        res.status(401).send('401: Unauthorized')
+    }    
 });
 
 /*========================================================================================================================
@@ -105,7 +135,8 @@ The post should be included in the body of the response in JSON with at least fo
 If not, the response status code should be “404 (Not found)”.
 ========================================================================================================================*/
 router.get('/:username/:postid', (req, res, next) => {
-    searchPosts({ username: req.params.username, postid: Number(req.params.postid) })
+    if(isValidUser(req.cookies, req.params.username)) {
+        searchPosts({ username: req.params.username, postid: Number(req.params.postid) })
         .then(post => {
             if (post) {
                 console.log("post is ", post);
@@ -118,6 +149,9 @@ router.get('/:username/:postid', (req, res, next) => {
         .catch(e => {
             console.log("error getting api postid post", e);
         });
+    } else {
+        res.status(401).send('401: Unauthorized')
+    }    
 });
 
 /*========================================================================================================================
@@ -142,7 +176,8 @@ router.put('/:username/:postid', (req, res, next) => {
     let m = Number(Date.now());
     let queryForExistence = { username: user, postid: id };
 
-    searchPosts(queryForExistence)
+    if(isValidUser(req.cookies, user)) {
+        searchPosts(queryForExistence)
         .then(post => {
             if (!post || !isJSON(req.body) || !title || !body || !user || !id) {
                 res.status(400);
@@ -166,6 +201,9 @@ router.put('/:username/:postid', (req, res, next) => {
         .catch(err => {
             console.log('caught error for serachposts in put')
         });
+    } else {
+        res.status(401).send('401: Unauthorized')
+    }    
 });
 
 /*========================================================================================================================
@@ -180,7 +218,8 @@ router.delete('/:username/:postid', (req, res, next) => {
     let queryForExistence = { username: user, postid: id };
     console.log('got to delete function');
 
-    searchPosts(queryForExistence)
+    if(isValidUser(req.cookies, user)) {
+        searchPosts(queryForExistence)
         .then(post => {
             if (post) {
                 deletePost({ username: user, postid: id })
@@ -198,6 +237,9 @@ router.delete('/:username/:postid', (req, res, next) => {
         .catch(e => {
             console.log('caught error trying to search for posts in delete method api');
         });
+    } else {
+        res.status(401).send('401: Unauthorized')
+    }    
 });
 
 module.exports = router;
