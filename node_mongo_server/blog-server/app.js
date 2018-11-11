@@ -8,7 +8,7 @@ const assert = require('assert');
 var indexRouter = require('./routes/index');
 var blogRouter = require('./routes/blog');
 var loginRouter = require('./routes/login');
-var apiRouter = require('./routes/blog');
+var apiRouter = require('./routes/api');
 
 let client;
 var app = express();
