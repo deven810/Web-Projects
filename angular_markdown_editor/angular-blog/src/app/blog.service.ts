@@ -4,37 +4,53 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class BlogService {
-  private posts: Post[];
+  posts: Post[];
   http: XMLHttpRequest = new XMLHttpRequest();
   url:string = "http://localhost:3000/api/";
   cookie:any;
   rawCookie:string;
+  // context:any = this;
 
   constructor() { }
 
-  login(username:string, password:string) {
-    this.http.open("POST", "http://localhost:3000/login/");
-    this.http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    this.http.withCredentials = true;
-    this.http.onreadystatechange = (() => {
-      console.log(this.parseJWT(this.getCookie("jwt")));
-      this.rawCookie = this.getCookie("jwt");
-      this.cookie = this.parseJWT(this.getCookie("jwt"));
-    }); 
-    // this.http.send("username=user2&password=blogserver"); 
-    this.http.send("username="+username+"&password="+password); 
-
+  login(username:string, password:string):Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        // console.log("login")
+        this.http.open("POST", "http://localhost:3000/login/");
+        this.http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        this.http.withCredentials = true;
+        this.http.onreadystatechange = (() => {
+          if (this.http.readyState != 4) return;
+    // console.log(this.parseJWT(this.getCookie("jwt")));
+          this.rawCookie = this.getCookie("jwt");
+          this.cookie = this.parseJWT(this.getCookie("jwt"));
+        });  
+        this.http.onload = () => resolve();
+        this.http.onerror = () => reject();
+        this.http.send("username="+username+"&password="+password);   
+      } catch {
+        reject();
+      }
+    });
   }
 
-  fetchPosts(username: string): void {
-    console.log(username);
-    this.http.open("GET", this.url + encodeURI(username));
-    this.http.onreadystatechange = (() => this.populatePosts());
-    this.http.withCredentials = true;
-    this.http.send();
+  fetchPosts(username: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // console.log(username);
+      this.http.open("GET", this.url + encodeURI(username));
+      this.http.onreadystatechange = (() => this.populatePosts());
+      this.http.withCredentials = true;
+      this.http.responseType = "json";
+      this.http.onload = () => resolve();
+      this.http.onerror = () => reject();
+      this.http.send();
+    });
   }
 
   getPosts(username: string): Post[] {
+    // console.log("getposts")
+    // console.log(this.posts)
     return this.posts;
   }
 
@@ -42,57 +58,55 @@ export class BlogService {
     return this.posts.find((x) => { return x.postid === id })
   }
 
-  newPost(username: string): Post {
-    let p:Post = {"postid":0, 
-                  "created": new Date(), 
-                  "modified": new Date(),
-                  "title": "",
-                  "body": ""
-                }
-    this.http.open("POST", this.url + encodeURI(username));
-    this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    this.http.send(JSON.stringify(p)); 
-    this.http.onreadystatechange = (() => this.addModifyPost(p, true)); 
-    return p; 
+  newPost(username: string): Promise<Post> {
+    return new Promise((resolve, reject) => {
+      let p:Post = {"postid":0, 
+        "created": new Date(), 
+        "modified": new Date(),
+        "title": "",
+        "body": ""
+      }
+      this.http.open("POST", this.url + encodeURI(username));
+      this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      this.http.onload = () => resolve(p);
+      this.http.onerror = () => reject();
+      this.http.send(JSON.stringify(p)); 
+      this.http.onreadystatechange = (() => this.addModifyPost(p, true)); 
+      return p; 
+    })
   }
 
-  updatePost(username: string, post: Post): void {
-    this.http.open("PUT", this.url + encodeURI(username) + "/" + post.postid);
-    this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    this.http.send(JSON.stringify(post)); 
-    this.http.onreadystatechange = (() => this.addModifyPost(post, false)); 
+  updatePost(username: string, post: Post): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.http.open("PUT", this.url + encodeURI(username) + "/" + post.postid);
+      this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      this.http.onload = () => resolve();
+      this.http.onerror = () => reject();
+      this.http.onreadystatechange = (() => this.addModifyPost(post, false)); 
+      this.http.send(JSON.stringify(post)); 
+    });
   }
 
-  deletePost(username: string, postid: number): void {
-    this.http.open("DELETE", this.url + encodeURI(username) + "/" + postid);
-    this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    this.http.send();
-    this.http.onreadystatechange = (() => this.removePost(postid)); 
+  deletePost(username: string, postid: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.http.open("DELETE", this.url + encodeURI(username) + "/" + postid);
+      this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      this.http.onload = () => resolve();
+      this.http.onerror = () => reject();
+      this.http.onreadystatechange = (() => this.removePost(postid)); 
+      this.http.send();
+    });
   }
 
   //// Helper fuctions ////
 
-  removePost(postid:number) {
-    if (this.http.readyState != 4) return;
-
-    if (this.http.status === 204) {
-      this.posts = this.posts.filter(x => x.postid !== postid);      
-    } else {
-      ;
-    }
-  }
-
   populatePosts() {
     if (this.http.readyState != 4) return;
 
-    let result = [];
-    console.log(this.http.responseText);
-    // let s = this.http.responseXML.getElementsByTagName('');
-    // for (let i = 0; i < s.length; i++) {
-    //   result.push(s[i].getAttribute("data"));
-    // }
-    this.posts = this.http.response; 
-    console.log(this.posts);
+    this.posts = this.http.response;
+    // console.log("populate")
+    // console.log(this.http.response);
+    // console.log(this.posts);
   } 
 
   addModifyPost(post:Post, isAdd:boolean) {
@@ -118,6 +132,17 @@ export class BlogService {
     }
       
   } 
+
+  removePost(postid:number) {
+    if (this.http.readyState != 4) return;
+
+    if (this.http.status === 204) {
+      this.posts = this.posts.filter(x => x.postid !== postid);      
+    } else {
+      ;
+    }
+  }
+
   getCookie(cname) {
     var name = cname + "=";
     // document.cookie = "jwt = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NDI5MDA1ODIsInVzciI6ImNzMTQ0IiwiaWF0IjoxNTQyODkzMzgyfQ.xmiscoNljaH9erBB3K09Dvw_B0jmGLfFpB_sbadoD0E";

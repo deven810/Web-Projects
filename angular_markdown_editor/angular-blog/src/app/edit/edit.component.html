@@ -1,3 +1,30 @@
-<p>
-  edit works!
-</p>
+<div *ngIf="post">
+  <div name="edit-title">
+    <label> Title
+      <input [(ngModel)]="post.title" placeholder="Blog title"/>
+    </label>
+  </div>
+  <div>
+    <label> Body
+      <textarea name="body" rows="10" cols="40" [(ngModel)]="post.body"></textarea>
+    </label>
+  </div>
+  <div>
+    <label>Last modified
+      {{post.modified | date : 'short'}}
+    </label>
+  </div>
+  <!-- Buttons -->
+  <div>
+    <button (click)="onDelete()">
+      Delete
+    </button>
+    <button (click)="onSave()" disabled="true">
+        Save
+    </button>
+    <button (click)="onPreview()">
+        Preview
+    </button>      
+  </div>
+
+</div>
