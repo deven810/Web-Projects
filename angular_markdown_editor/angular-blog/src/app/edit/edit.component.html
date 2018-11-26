@@ -1,33 +1,26 @@
-<div *ngIf="post">
-  <div name="edit-title">
-    <label> Title
-      <input [(ngModel)]="post.title" placeholder="Blog title"/>
-    </label>
-  </div>
-  <div>
-    <label> Body
-      <textarea name="body" rows="10" cols="40" [(ngModel)]="post.body" placeholder="Enter body here"></textarea>
-    </label>
-  </div>
-  <div>
-    <label>Last modified
-      {{post.modified | date : 'short'}}
-    </label>
-  </div>
-  {{post.postid}}
-
-  <!-- Buttons -->
+<div class="editWrapper" *ngIf="post">
+    <div name="edit-title">
+      <label> Title
+        <input [(ngModel)]="post.title" placeholder="Blog title" />
+      </label>
+    </div>
+    <div>
+      <label> Body
+        <textarea name="body" rows="10" cols="40" [(ngModel)]="post.body" placeholder="Enter body here"></textarea>
+      </label>
+    </div>
   
-  <div>
+    Last modified
+    {{post.modified | date : 'short'}}
+  
+  
     <button (click)="onDelete()">
       Delete
     </button>
     <button (click)="onSave()">
-        Save
+      Save
     </button>
     <button (click)="onPreview()">
-        Preview
-    </button>      
+      Preview
+    </button>
   </div>
-
-</div>

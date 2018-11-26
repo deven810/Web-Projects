@@ -66,6 +66,7 @@ export class BlogService {
   }
 
   getPost(username: string, id: number): Post {
+    console.log(this.posts)
     return this.posts.find((x) => { return x.postid === id })
   }
 

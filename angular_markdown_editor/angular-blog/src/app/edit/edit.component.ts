@@ -22,9 +22,10 @@ export class EditComponent implements OnInit {
   ngOnInit() {
     this.blogService.login("cs144", "password")
       .then(() => {
-        return this.blogService.fetchPosts(this.parseJWT(this.getCookie("jwt")).usr);
+        return this.blogService.fetchPosts(this.blogService.parseJWT(this.blogService.getCookie("jwt")).usr);
       })
       .then(() => {
+        // console.log(this.blogService.posts)
         this.route.paramMap.subscribe(() => this.getPost());
       })
 
@@ -33,7 +34,7 @@ export class EditComponent implements OnInit {
   getPost(): void {
     const id = this.route.snapshot.paramMap.get('id');
     const user = this.blogService.user;
-    console.log(user)
+    // console.log(this.blogService.posts)
     this.post = this.blogService.getPost(this.blogService.user, Number(id))
     console.log(this.post)
   }
@@ -51,10 +52,9 @@ export class EditComponent implements OnInit {
   }
 
   onPreview() {
-
-    // this.bs.posts.push()
     this.onSave();
-    console.log("Asked for preview")
+    this.router.navigate(['/preview/'+this.post.postid])
+    // console.log("Asked for preview")
   }
 
   onSave() {
@@ -66,29 +66,6 @@ export class EditComponent implements OnInit {
           console.log(status)
         }
       })
-  }
-
-  getCookie(cname) {
-    var name = cname + "=";
-    // document.cookie = "jwt = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NDI5MDA1ODIsInVzciI6ImNzMTQ0IiwiaWF0IjoxNTQyODkzMzgyfQ.xmiscoNljaH9erBB3K09Dvw_B0jmGLfFpB_sbadoD0E";
-    var decodedCookie = decodeURIComponent(document.cookie);
-    var ca = decodedCookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
-    }
-    return "";
-  }
-
-  parseJWT(token) {
-    let base64Url = token.split('.')[1];
-    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(base64));
   }
 }
 

@@ -1,17 +1,14 @@
 <button type="button" (click)=onCreate()>
-  New post
-</button>
-
-<ul>
-  <li *ngFor='let post of this.bs.posts'>
-    <a routerLink="/edit/{{post.postid}}">
-      <span>
-        {{post.created | date : 'short'}}
+    New post
+  </button>
+  
+  <ul class="posts">
+    <li *ngFor='let post of this.bs.posts'>
+      <a routerLink="/edit/{{post.postid}}">
+        <span class="listItem">
+          {{post.created | date : 'short'}}
+        </span>
         {{post.title}}
-      </span>
-    </a>
-  </li>
-</ul>
-
-<app-edit [post]="selectedPost"></app-edit>
-<app-preview [post]="selectedPost"></app-preview>
+      </a>
+    </li>
+  </ul>

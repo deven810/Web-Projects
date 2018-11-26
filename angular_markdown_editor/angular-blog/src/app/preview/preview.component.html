@@ -1,3 +1,13 @@
-<p>
-  preview works!
-</p>
+<div *ngIf="post">
+  <div innerHTML="{{display.title}}"></div>
+  <div innerHTML="{{display.body}}"></div>
+  
+  <!-- Buttons -->
+  
+  <div>
+    <button (click)="onEdit()">
+      Edit
+    </button>
+  </div>
+
+</div>

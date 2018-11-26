@@ -10,20 +10,39 @@ import { Parser, HtmlRenderer } from 'commonmark';
 })
 export class PreviewComponent implements OnInit {
   @Input() post: Post;
+  display:Post;
+  reader:Parser;
+  writer:HtmlRenderer;
+
   constructor(private route: ActivatedRoute, private blogService: BlogService, private router: Router) {
-    this.route.paramMap.subscribe(() => this.getPost());
   }
 
   ngOnInit() {
+    this.blogService.login("cs144", "password")
+    .then(() => {
+      return this.blogService.fetchPosts(this.blogService.parseJWT(this.blogService.getCookie("jwt")).usr);
+    })
+    .then(() => {
+      // console.log(this.blogService.posts)
+      this.route.paramMap.subscribe(() => this.getPost());
+    })
+    this.reader = new Parser();
+    this.writer = new HtmlRenderer(); 
   }
 
   getPost(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = +this.route.snapshot.paramMap.get('id');
     const user = this.blogService.user;
-    console.log(user)
-    this.post = this.blogService.getPost(this.blogService.user, Number(id))
+    this.post = this.blogService.getPost(this.blogService.user, id)
+    console.log(this.blogService.posts)
+    
+    this.display.title = this.writer.render(this.reader.parse(this.post.title))
+    this.display.body = this.writer.render(this.reader.parse(this.post.body))
     console.log(this.post)
+
   }
 
-
+  onEdit(): void {
+    this.router.navigate(['/edit/'+this.post.postid])
+  }
 }
