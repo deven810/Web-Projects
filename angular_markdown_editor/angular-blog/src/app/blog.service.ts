@@ -7,15 +7,15 @@ import { JsonPipe } from '@angular/common';
 export class BlogService {
   posts: Post[];
   http: XMLHttpRequest = new XMLHttpRequest();
-  url:string = "http://localhost:3000/api/";
-  cookie:any;
-  rawCookie:string;
-  user:string;
-  uid:number=3; 
-  
+  url: string = "http://localhost:3000/api/";
+  cookie: any;
+  rawCookie: string;
+  user: string;
+  uid: number = 3;
+
   constructor() { }
 
-  login(username:string, password:string):Promise<void> {
+  login(username: string, password: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         // console.log(this.parseJWT(this.getCookie("jwt")));
@@ -31,9 +31,9 @@ export class BlogService {
           this.rawCookie = this.getCookie("jwt");
           this.cookie = this.parseJWT(this.getCookie("jwt"));
           this.user = this.cookie.usr;
-        });  
+        });
 
-        this.http.send("username="+username+"&password="+password);   
+        this.http.send("username=" + username + "&password=" + password);
       } catch {
         reject();
       }
@@ -51,7 +51,7 @@ export class BlogService {
 
       this.http.onreadystatechange = (() => {
         if (this.http.readyState != 4) return;
-        this.posts = this.http.response;    
+        this.posts = this.http.response;
       });
 
       this.http.send();
@@ -71,8 +71,8 @@ export class BlogService {
   newPost(username: string): Promise<[number, Post]> {
     this.uid++;
     let time = new Date();
-    let p:Post = {
-      "postid":this.uid, 
+    let p: Post = {
+      "postid": this.uid,
       "created": time,
       "modified": time,
       "title": "",
@@ -82,8 +82,8 @@ export class BlogService {
       //Add to local copy
 
       let ps = {
-        "postid":0,
-        "username":this.user,
+        "postid": 0,
+        "username": this.user,
         "title": "",
         "body": ""
       }
@@ -96,10 +96,10 @@ export class BlogService {
       this.http.onload = () => resolve([this.http.status, p]);
       this.http.onerror = () => reject();
 
-      this.http.onreadystatechange = (() => this.addModifyPost(p, true)); 
+      this.http.onreadystatechange = (() => this.addModifyPost(p, true));
 
       console.log(JSON.stringify(ps))
-      this.http.send(JSON.stringify(ps)); 
+      this.http.send(JSON.stringify(ps));
     })
   }
 
@@ -107,9 +107,9 @@ export class BlogService {
     return new Promise((resolve, reject) => {
       //Update local copy
       this.posts = this.posts.map((x) => {
-        if(x.postid === post.postid)
+        if (x.postid === post.postid)
           return post;
-        else 
+        else
           return x;
       });
 
@@ -119,9 +119,9 @@ export class BlogService {
       this.http.onload = () => resolve(this.http.status);
       this.http.onerror = () => reject();
 
-      this.http.onreadystatechange = (() => this.addModifyPost(post, false)); 
-      
-      this.http.send(JSON.stringify(post)); 
+      this.http.onreadystatechange = (() => this.addModifyPost(post, false));
+
+      this.http.send(JSON.stringify(post));
     });
   }
 
@@ -130,7 +130,7 @@ export class BlogService {
       //Remove local copy
       console.log(this)
       console.log(this.posts)
-      this.posts = this.posts.filter(x => x.postid !== postid);    
+      this.posts = this.posts.filter(x => x.postid !== postid);
       // this.posts.pop();  
       console.log(this.posts)
 
@@ -140,8 +140,8 @@ export class BlogService {
       this.http.onload = () => resolve(this.http.status);
       this.http.onerror = () => reject();
 
-      this.http.onreadystatechange = (() => this.removePost(postid)); 
-      
+      this.http.onreadystatechange = (() => this.removePost(postid));
+
       this.http.send();
     });
   }
@@ -155,29 +155,29 @@ export class BlogService {
     // console.log("populate")
     // console.log(this.http.response);
     // console.log(this.posts);
-  } 
+  }
 
-  addModifyPost(post:Post, isAdd:boolean) {
+  addModifyPost(post: Post, isAdd: boolean) {
     if (this.http.readyState != 4) return;
 
     if (isAdd === true) { // Add to posts array if the backend changed. 
-      if(this.http.status === 201)
+      if (this.http.status === 201)
         console.log()
-        // this.posts.push(post); 
-      else 
+      // this.posts.push(post); 
+      else
         ; // Add error checking
     }
     else {  // Edit the posts array if the backend changed. 
       if (this.http.status === 200) {
         console.log()
       }
-      else 
-      ; // Add error checking
+      else
+        ; // Add error checking
     }
-      
-  } 
 
-  removePost(postid:number) {
+  }
+
+  removePost(postid: number) {
     if (this.http.readyState != 4) return;
 
     if (this.http.status === 204) {
@@ -191,20 +191,19 @@ export class BlogService {
     // document.cookie = "jwt = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NDI5MDA1ODIsInVzciI6ImNzMTQ0IiwiaWF0IjoxNTQyODkzMzgyfQ.xmiscoNljaH9erBB3K09Dvw_B0jmGLfFpB_sbadoD0E";
     var decodedCookie = decodeURIComponent(document.cookie);
     var ca = decodedCookie.split(';');
-    for(var i = 0; i <ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
     }
     return "";
   }
 
-  parseJWT(token) 
-  {
+  parseJWT(token) {
     let base64Url = token.split('.')[1];
     let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     return JSON.parse(atob(base64));

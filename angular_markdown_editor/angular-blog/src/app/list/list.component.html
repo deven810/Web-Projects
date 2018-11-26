@@ -3,11 +3,13 @@
 </button>
 
 <ul>
-  <li *ngFor='let post of posts' (click)="onSelect(post)">
-    <span>
-      {{post.created | date : 'short'}}
-      {{post.title}}
-    </span>
+  <li *ngFor='let post of posts'>
+    <a routerLink="/edit/{{post.postid}}">
+      <span>
+        {{post.created | date : 'short'}}
+        {{post.title}}
+      </span>
+    </a>
   </li>
 </ul>
 
