@@ -9,11 +9,11 @@ import { BlogService, Post } from "../blog.service";
   styleUrls: ['./list.component.css']
 })
 export class ListComponent implements OnInit {
-  posts: Post[];
+  // posts: Post[];
   user: string;
   selectedPost: Post;
   secret: string = 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c';
-  constructor(private bs: BlogService) { }
+  constructor(public bs: BlogService) { }
 
   ngOnInit() {
     let decode;
@@ -21,15 +21,13 @@ export class ListComponent implements OnInit {
       // this.bs.login("user2", "blogserver")
       this.bs.login("cs144", "password")
         .then(() => {
-          console.log("promise fulfilled")
           decode = this.parseJWT(this.getCookie("jwt"));
           this.user = decode.usr;
           return this.bs.fetchPosts(this.user);
         })
         .then(() => {
-          console.log("fetched posts")
-          this.posts = this.bs.getPosts(this.user);
-          console.log(this.posts);
+          // this.posts = this.bs.getPosts(this.user);
+          console.log(this.bs.posts)
         })
         .catch(() => console.log("fuck me"));
     }

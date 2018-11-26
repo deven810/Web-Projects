@@ -3,7 +3,7 @@
 </button>
 
 <ul>
-  <li *ngFor='let post of posts'>
+  <li *ngFor='let post of this.bs.posts'>
     <a routerLink="/edit/{{post.postid}}">
       <span>
         {{post.created | date : 'short'}}
@@ -14,3 +14,4 @@
 </ul>
 
 <app-edit [post]="selectedPost"></app-edit>
+<app-preview [post]="selectedPost"></app-preview>
