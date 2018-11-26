@@ -11,7 +11,7 @@ export class BlogService {
   cookie: any;
   rawCookie: string;
   user: string;
-  uid: number = 3;
+  uid: number;
 
   constructor() { }
 
@@ -52,6 +52,7 @@ export class BlogService {
       this.http.onreadystatechange = (() => {
         if (this.http.readyState != 4) return;
         this.posts = this.http.response;
+        this.uid = this.posts[this.posts.length - 1].postid;
       });
 
       this.http.send();
@@ -78,15 +79,15 @@ export class BlogService {
       "title": "",
       "body": ""
     }
+    let ps = {
+      "postid": 0,
+      "username": this.user,
+      "title": "",
+      "body": ""
+    }
     return new Promise((resolve, reject) => {
       //Add to local copy
 
-      let ps = {
-        "postid": 0,
-        "username": this.user,
-        "title": "",
-        "body": ""
-      }
       this.posts.push(p);
 
       //Add to the backend
