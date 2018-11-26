@@ -6,7 +6,7 @@
   </div>
   <div>
     <label> Body
-      <textarea name="body" rows="10" cols="40" [(ngModel)]="post.body"></textarea>
+      <textarea name="body" rows="10" cols="40" [(ngModel)]="post.body" placeholder="Enter body here"></textarea>
     </label>
   </div>
   <div>
@@ -14,12 +14,15 @@
       {{post.modified | date : 'short'}}
     </label>
   </div>
+  {{post.postid}}
+
   <!-- Buttons -->
+  
   <div>
     <button (click)="onDelete()">
       Delete
     </button>
-    <button (click)="onSave()" disabled="true">
+    <button (click)="onSave()">
         Save
     </button>
     <button (click)="onPreview()">

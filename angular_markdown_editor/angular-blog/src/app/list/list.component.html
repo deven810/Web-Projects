@@ -1,3 +1,7 @@
+<button type="button" (click)=onCreate()>
+  New post
+</button>
+
 <ul>
   <li *ngFor='let post of posts' (click)="onSelect(post)">
     <span>

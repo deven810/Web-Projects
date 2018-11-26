@@ -29,8 +29,8 @@ function isJSON(item) {
 function isValidUser(cookie, username) {
     try {
         cookie = jwt.verify(cookie.jwt, secret)
-        console.log(cookie)
-        console.log(Date.now()/1000)
+        // console.log(cookie)
+        // console.log(Date.now()/1000)
         if (cookie.exp < (Date.now()/1000) || cookie.usr != username) {
             return false; 
         } 
@@ -76,12 +76,15 @@ router.post('/:username/:postid', (req, res, next) => {
     let m = c;
     let query = { postid: id, username: user, created: c, modified: m, title: title, body: body }
     let queryForExistence = { postid: id, username: user };
+    // console.log(req);
+    // console.log(title, body, user, id, c, m);
     // If the insertion is successful, the server should reply with “201 (Created)” status code
     if(isValidUser(req.cookies, user)) {
     searchPosts(queryForExistence)
         .then(post => {
 
-            if (post || !isJSON(req.body) || !title || !body || !user || !id) {
+            if (post || !isJSON(req.body) || title == null || body == null || !user || id == null) {
+                console.log(title == null , body == null , !user , id == null);
                 res.status(400);
                 if (post) {
                     res.send('400: post already exists')
@@ -224,7 +227,7 @@ router.delete('/:username/:postid', (req, res, next) => {
             if (post) {
                 deletePost({ username: user, postid: id })
                     .then(succ => {
-                        console.log('deletion successful!', succ);
+                        // console.log('deletion successful!', succ);
                         res.status(204).send('204: Deleted post!'); // server reply with 'No content' status code
                     })
                     .catch(err => {

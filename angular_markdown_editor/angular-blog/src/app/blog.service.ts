@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { JsonPipe } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -9,25 +10,29 @@ export class BlogService {
   url:string = "http://localhost:3000/api/";
   cookie:any;
   rawCookie:string;
-  // context:any = this;
-
+  user:string;
+  uid:number=3; 
+  
   constructor() { }
 
   login(username:string, password:string):Promise<void> {
     return new Promise((resolve, reject) => {
       try {
+        // console.log(this.parseJWT(this.getCookie("jwt")));
         // console.log("login")
         this.http.open("POST", "http://localhost:3000/login/");
         this.http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         this.http.withCredentials = true;
-        this.http.onreadystatechange = (() => {
-          if (this.http.readyState != 4) return;
-    // console.log(this.parseJWT(this.getCookie("jwt")));
-          this.rawCookie = this.getCookie("jwt");
-          this.cookie = this.parseJWT(this.getCookie("jwt"));
-        });  
         this.http.onload = () => resolve();
         this.http.onerror = () => reject();
+
+        this.http.onreadystatechange = (() => {
+          if (this.http.readyState != 4) return;
+          this.rawCookie = this.getCookie("jwt");
+          this.cookie = this.parseJWT(this.getCookie("jwt"));
+          this.user = this.cookie.usr;
+        });  
+
         this.http.send("username="+username+"&password="+password);   
       } catch {
         reject();
@@ -39,11 +44,16 @@ export class BlogService {
     return new Promise((resolve, reject) => {
       // console.log(username);
       this.http.open("GET", this.url + encodeURI(username));
-      this.http.onreadystatechange = (() => this.populatePosts());
       this.http.withCredentials = true;
       this.http.responseType = "json";
       this.http.onload = () => resolve();
       this.http.onerror = () => reject();
+
+      this.http.onreadystatechange = (() => {
+        if (this.http.readyState != 4) return;
+        this.posts = this.http.response;    
+      });
+
       this.http.send();
     });
   }
@@ -58,42 +68,80 @@ export class BlogService {
     return this.posts.find((x) => { return x.postid === id })
   }
 
-  newPost(username: string): Promise<Post> {
+  newPost(username: string): Promise<[number, Post]> {
+    this.uid++;
+    let time = new Date();
+    let p:Post = {
+      "postid":this.uid, 
+      "created": time,
+      "modified": time,
+      "title": "",
+      "body": ""
+    }
     return new Promise((resolve, reject) => {
-      let p:Post = {"postid":0, 
-        "created": new Date(), 
-        "modified": new Date(),
+      //Add to local copy
+
+      let ps = {
+        "postid":0,
+        "username":this.user,
         "title": "",
         "body": ""
       }
-      this.http.open("POST", this.url + encodeURI(username));
+      this.posts.push(p);
+
+      //Add to the backend
+      this.http.open("POST", this.url + encodeURI(username) + "/" + p.postid);
+      console.log(this.url + encodeURI(username) + "/" + p.postid);
       this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-      this.http.onload = () => resolve(p);
+      this.http.onload = () => resolve([this.http.status, p]);
       this.http.onerror = () => reject();
-      this.http.send(JSON.stringify(p)); 
+
       this.http.onreadystatechange = (() => this.addModifyPost(p, true)); 
-      return p; 
+
+      console.log(JSON.stringify(ps))
+      this.http.send(JSON.stringify(ps)); 
     })
   }
 
-  updatePost(username: string, post: Post): Promise<void> {
+  updatePost(username: string, post: Post): Promise<number> {
     return new Promise((resolve, reject) => {
+      //Update local copy
+      this.posts = this.posts.map((x) => {
+        if(x.postid === post.postid)
+          return post;
+        else 
+          return x;
+      });
+
+      //Update backend copy
       this.http.open("PUT", this.url + encodeURI(username) + "/" + post.postid);
       this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-      this.http.onload = () => resolve();
+      this.http.onload = () => resolve(this.http.status);
       this.http.onerror = () => reject();
+
       this.http.onreadystatechange = (() => this.addModifyPost(post, false)); 
+      
       this.http.send(JSON.stringify(post)); 
     });
   }
 
-  deletePost(username: string, postid: number): Promise<void> {
+  deletePost(username: string, postid: number): Promise<number> {
     return new Promise((resolve, reject) => {
+      //Remove local copy
+      console.log(this)
+      console.log(this.posts)
+      this.posts = this.posts.filter(x => x.postid !== postid);    
+      // this.posts.pop();  
+      console.log(this.posts)
+
+      //Remove backend copy
       this.http.open("DELETE", this.url + encodeURI(username) + "/" + postid);
       this.http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-      this.http.onload = () => resolve();
+      this.http.onload = () => resolve(this.http.status);
       this.http.onerror = () => reject();
+
       this.http.onreadystatechange = (() => this.removePost(postid)); 
+      
       this.http.send();
     });
   }
@@ -114,18 +162,14 @@ export class BlogService {
 
     if (isAdd === true) { // Add to posts array if the backend changed. 
       if(this.http.status === 201)
-        this.posts.push(post); 
+        console.log()
+        // this.posts.push(post); 
       else 
         ; // Add error checking
     }
     else {  // Edit the posts array if the backend changed. 
       if (this.http.status === 200) {
-        this.posts = this.posts.map((x) => {
-          if(x.postid === post.postid)
-            return post;
-          else 
-            return x;
-        });
+        console.log()
       }
       else 
       ; // Add error checking
@@ -137,7 +181,6 @@ export class BlogService {
     if (this.http.readyState != 4) return;
 
     if (this.http.status === 204) {
-      this.posts = this.posts.filter(x => x.postid !== postid);      
     } else {
       ;
     }

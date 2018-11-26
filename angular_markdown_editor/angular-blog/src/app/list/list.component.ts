@@ -13,22 +13,22 @@ export class ListComponent implements OnInit {
   user:string;
   selectedPost:Post;
   secret:string = 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c';
-  constructor(private blogService: BlogService) { }
+  constructor(private bs: BlogService) { }
 
   ngOnInit() {
     let decode;
     try {
-      // this.blogService.login("user2", "blogserver")
-      this.blogService.login("cs144", "password")
+      // this.bs.login("user2", "blogserver")
+      this.bs.login("cs144", "password")
       .then(() => {
         console.log("promise fulfilled")
         decode = this.parseJWT(this.getCookie("jwt"));
         this.user = decode.usr; 
-        return this.blogService.fetchPosts(this.user);
+        return this.bs.fetchPosts(this.user);
       })
       .then(() => {
         console.log("fetched posts")
-        this.posts = this.blogService.getPosts(this.user);
+        this.posts = this.bs.getPosts(this.user);
         console.log(this.posts);  
       })   
       .catch(() => console.log("fuck me"));
@@ -40,6 +40,17 @@ export class ListComponent implements OnInit {
 
   onSelect(post:Post) {
     this.selectedPost = post;
+  }
+
+  onCreate() {
+    this.bs.newPost(this.bs.user)
+    .then((status) => {
+      if (status[0] !== 201) {
+        alert("Error add new post to the server.")
+        // console.log(status[0],status[1].postid); 
+        this.bs.deletePost(this.bs.user, status[1].postid)
+      }
+    })
   }
 
   //// Helper function ////
