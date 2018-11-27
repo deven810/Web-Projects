@@ -8,7 +8,8 @@ const secret = "C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c"
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-    res.render('../views/login.ejs', {});
+    
+    res.render('../views/login.ejs', {redir:req.query.redirect});
 });
 
 router.post('/', function (req, res, next) {
@@ -42,7 +43,9 @@ router.post('/', function (req, res, next) {
                 }
                 res.render('../views/login.ejs', {})
             } else {
-                res.redirect(req.body.redirect);
+                console.log(redir)
+
+                res.redirect(redir);
             }
         })    
     }

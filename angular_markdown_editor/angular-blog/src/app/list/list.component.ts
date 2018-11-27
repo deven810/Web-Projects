@@ -21,14 +21,12 @@ export class ListComponent implements OnInit {
     let decode;
     try {
       // this.bs.login("user2", "blogserver")
-      this.bs.login("cs144", "password")
+      this.user = this.bs.parseJWT(this.bs.getCookie("jwt")).usr;
+      console.log(this.user)
+      console.log(document.cookie)
+      console.log("yeah")
+      this.bs.fetchPosts(this.user)
         .then(() => {
-          decode = this.bs.parseJWT(this.bs.getCookie("jwt"));
-          this.user = decode.usr;
-          return this.bs.fetchPosts(this.user);
-        })
-        .then(() => {
-          // this.posts = this.bs.getPosts(this.user);
           console.log(this.bs.posts)
         })
         .catch(() => console.log("fuck me"));
@@ -45,12 +43,18 @@ export class ListComponent implements OnInit {
   onCreate() {
     this.bs.newPost(this.bs.user)
       .then((status) => {
-        if (status[0] !== 201) {
+        let statusCode = status[0];
+        let post = status[1];
+        if (statusCode !== 201) {
+          console.log('deven');
           alert("Error add new post to the server.")
           // console.log(status[0],status[1].postid); 
-          this.bs.deletePost(this.bs.user, status[1].postid)
+          this.bs.deletePost(this.bs.user, post.postid)
+          this.router.navigate(['/'])
+        } else {
+          console.log('haejin');
+          this.router.navigate(['/edit/'+post.postid])
         }
-        this.router.navigate(['/edit/'+status[1].postid])
       })
   }
 
