@@ -41,7 +41,7 @@ router.post('/', function (req, res, next) {
                 } else {
                     res.status(401);
                 }
-                res.render('../views/login.ejs', {})
+                res.render('../views/login.ejs', {'redir':""})
             } else {
                 console.log(redir)
 
