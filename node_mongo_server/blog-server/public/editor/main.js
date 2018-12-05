@@ -241,6 +241,10 @@ var BlogService = /** @class */ (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             // console.log(username);
+<<<<<<< HEAD
+=======
+            console.log("boom");
+>>>>>>> fucked
             _this.http.open("GET", _this.url + encodeURI(username));
             _this.http.withCredentials = true;
             _this.http.responseType = "json";
@@ -249,6 +253,10 @@ var BlogService = /** @class */ (function () {
             _this.http.onreadystatechange = (function () {
                 if (_this.http.readyState != 4)
                     return;
+<<<<<<< HEAD
+=======
+                console.log(_this.http.response);
+>>>>>>> fucked
                 _this.posts = _this.http.response;
                 _this.uid = _this.posts[_this.posts.length - 1].postid;
             });
@@ -372,6 +380,10 @@ var BlogService = /** @class */ (function () {
         var name = cname + "=";
         // document.cookie = "jwt = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NDI5MDA1ODIsInVzciI6ImNzMTQ0IiwiaWF0IjoxNTQyODkzMzgyfQ.xmiscoNljaH9erBB3K09Dvw_B0jmGLfFpB_sbadoD0E";
         var decodedCookie = decodeURIComponent(document.cookie);
+<<<<<<< HEAD
+=======
+        console.log(document.cookie);
+>>>>>>> fucked
         var ca = decodedCookie.split(';');
         for (var i = 0; i < ca.length; i++) {
             var c = ca[i];
@@ -469,10 +481,14 @@ var EditComponent = /** @class */ (function () {
     };
     EditComponent.prototype.ngOnInit = function () {
         var _this = this;
+<<<<<<< HEAD
         this.blogService.login("cs144", "password")
             .then(function () {
             return _this.blogService.fetchPosts(_this.blogService.parseJWT(_this.blogService.getCookie("jwt")).usr);
         })
+=======
+        this.blogService.fetchPosts(this.blogService.parseJWT(this.blogService.getCookie("jwt")).usr)
+>>>>>>> fucked
             .then(function () {
             // console.log(this.blogService.posts)
             _this.route.paramMap.subscribe(function () { return _this.getPost(); });
@@ -598,6 +614,7 @@ var ListComponent = /** @class */ (function () {
         var decode;
         try {
             // this.bs.login("user2", "blogserver")
+<<<<<<< HEAD
             this.bs.login("cs144", "password")
                 .then(function () {
                 decode = _this.bs.parseJWT(_this.bs.getCookie("jwt"));
@@ -606,6 +623,14 @@ var ListComponent = /** @class */ (function () {
             })
                 .then(function () {
                 // this.posts = this.bs.getPosts(this.user);
+=======
+            this.user = this.bs.parseJWT(this.bs.getCookie("jwt")).usr;
+            console.log(this.user);
+            console.log(document.cookie);
+            console.log("yeah");
+            this.bs.fetchPosts(this.user)
+                .then(function () {
+>>>>>>> fucked
                 console.log(_this.bs.posts);
             })
                 .catch(function () { return console.log("fuck me"); });
@@ -621,12 +646,28 @@ var ListComponent = /** @class */ (function () {
         var _this = this;
         this.bs.newPost(this.bs.user)
             .then(function (status) {
+<<<<<<< HEAD
             if (status[0] !== 201) {
                 alert("Error add new post to the server.");
                 // console.log(status[0],status[1].postid); 
                 _this.bs.deletePost(_this.bs.user, status[1].postid);
             }
             _this.router.navigate(['/edit/' + status[1].postid]);
+=======
+            var statusCode = status[0];
+            var post = status[1];
+            if (statusCode !== 201) {
+                console.log('deven');
+                alert("Error add new post to the server.");
+                // console.log(status[0],status[1].postid); 
+                _this.bs.deletePost(_this.bs.user, post.postid);
+                _this.router.navigate(['/']);
+            }
+            else {
+                console.log('haejin');
+                _this.router.navigate(['/edit/' + post.postid]);
+            }
+>>>>>>> fucked
         });
     };
     ListComponent = __decorate([
@@ -702,10 +743,14 @@ var PreviewComponent = /** @class */ (function () {
     }
     PreviewComponent.prototype.ngOnInit = function () {
         var _this = this;
+<<<<<<< HEAD
         this.blogService.login("cs144", "password")
             .then(function () {
             return _this.blogService.fetchPosts(_this.blogService.parseJWT(_this.blogService.getCookie("jwt")).usr);
         })
+=======
+        this.blogService.fetchPosts(this.blogService.parseJWT(this.blogService.getCookie("jwt")).usr)
+>>>>>>> fucked
             .then(function () {
             // console.log(this.blogService.posts)
             _this.route.paramMap.subscribe(function () { return _this.getPost(); });
@@ -805,7 +850,11 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+<<<<<<< HEAD
 module.exports = __webpack_require__(/*! /home/cs144/shared/DEVEN_WORK/angular_markdown_editor/angular-blog/src/main.ts */"./src/main.ts");
+=======
+module.exports = __webpack_require__(/*! /home/cs144/shared/angular_markdown_editor/angular-blog/src/main.ts */"./src/main.ts");
+>>>>>>> fucked
 
 
 /***/ })

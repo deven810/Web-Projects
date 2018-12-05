@@ -43,6 +43,7 @@ export class BlogService {
   fetchPosts(username: string): Promise<void> {
     return new Promise((resolve, reject) => {
       // console.log(username);
+      console.log("boom")
       this.http.open("GET", this.url + encodeURI(username));
       this.http.withCredentials = true;
       this.http.responseType = "json";
@@ -51,6 +52,7 @@ export class BlogService {
 
       this.http.onreadystatechange = (() => {
         if (this.http.readyState != 4) return;
+        console.log(this.http.response)
         this.posts = this.http.response;
         this.uid = this.posts[this.posts.length - 1].postid;
       });
@@ -192,6 +194,7 @@ export class BlogService {
     var name = cname + "=";
     // document.cookie = "jwt = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NDI5MDA1ODIsInVzciI6ImNzMTQ0IiwiaWF0IjoxNTQyODkzMzgyfQ.xmiscoNljaH9erBB3K09Dvw_B0jmGLfFpB_sbadoD0E";
     var decodedCookie = decodeURIComponent(document.cookie);
+    console.log(document.cookie);
     var ca = decodedCookie.split(';');
     for (var i = 0; i < ca.length; i++) {
       var c = ca[i];

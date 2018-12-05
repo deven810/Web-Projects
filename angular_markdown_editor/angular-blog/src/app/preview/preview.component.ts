@@ -18,10 +18,7 @@ export class PreviewComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.blogService.login("cs144", "password")
-    .then(() => {
-      return this.blogService.fetchPosts(this.blogService.parseJWT(this.blogService.getCookie("jwt")).usr);
-    })
+    this.blogService.fetchPosts(this.blogService.parseJWT(this.blogService.getCookie("jwt")).usr)
     .then(() => {
       // console.log(this.blogService.posts)
       this.route.paramMap.subscribe(() => this.getPost());

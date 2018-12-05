@@ -4,12 +4,14 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const assert = require('assert');
+var jwt = require('jsonwebtoken');
 
 var indexRouter = require('./routes/index');
 var blogRouter = require('./routes/blog');
 var loginRouter = require('./routes/login');
 var apiRouter = require('./routes/api');
-var editorRouter = require('./routes/editor');
+// var editorRouter = require('./routes/editor');
+const secret = "C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c"
 
 let client;
 var app = express();
@@ -22,13 +24,38 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
+// app.get('/*', (req, res) => {
+    //   let user = req.
+    //   if (isValidUser(req.cookies, user)) {
+        
+        //   }
+        // })
+        // console.log("bitch")
+
+app.all('/editor', (req, res, next) => {
+    let ye = isValidCookie(req.cookies);
+    console.log(ye)
+    if (ye) {
+        console.log("bitch")
+        console.log(req.url);
+        console.log(req.cookies);
+        next()
+        // res.redirect(req.url);
+
+    } else {
+        console.log(req.url);
+        // console.log(req.cookies);
+        res.redirect('/login?redirect=/editor/');
+    }
+}, express.static(path.join(__dirname, 'public')));
+        
+
+// app.use('/editor', editorRouter);
 app.use('/', indexRouter);
 app.use('/blog', blogRouter);
 app.use('/login', loginRouter);
 app.use('/api', apiRouter);
-app.use('/editor', editorRouter);
 
 // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
@@ -46,4 +73,22 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
+function isValidCookie(cookie) {
+    try {
+        console.log(cookie.jwt);
+        cookie = jwt.verify(cookie.jwt, secret)
+        if (cookie.exp < (Date.now()/1000)) {
+            console.log("yeah")
+            return false; 
+        } 
+        return true; 
+    }
+    catch (err) {
+            console.log("here")
+            console.log(err)
+            return false;
+    }
+}
+
 module.exports = { app: app, db: client };
+ 
